@@ -9,6 +9,26 @@ members = [
     "crates/proveit-gpu",
 ]
 
+[package]
+name = "proveit"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Alaina Scott"]
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[dependencies]
+proveit-core = { path = "crates/proveit-core" }
+proveit-type-checker = { path = "crates/proveit-type-checker" }
+proveit-spatial = { path = "crates/proveit-spatial" }
+proveit-formal = { path = "crates/proveit-formal" }
+proveit-accessibility = { path = "crates/proveit-accessibility" }
+proveit-gpu = { path = "crates/proveit-gpu" }
+nalgebra.workspace = true
+
 [workspace.package]
 version = "0.1.0"
 edition = "2021"

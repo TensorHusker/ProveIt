@@ -1,0 +1,15 @@
+[package]
+name = "proveit-type-checker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proveit-core = { path = "../proveit-core" }
+serde.workspace = true
+thiserror.workspace = true
+
+[lib]
+name = "proveit_type_checker"
+path = "src/lib.rs"

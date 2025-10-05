@@ -1,0 +1,16 @@
+[package]
+name = "proveit-gpu"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proveit-core = { path = "../proveit-core" }
+proveit-spatial = { path = "../proveit-spatial" }
+wgpu.workspace = true
+bytemuck.workspace = true
+
+[lib]
+name = "proveit_gpu"
+path = "src/lib.rs"

@@ -1,0 +1,15 @@
+[package]
+name = "proveit-accessibility"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proveit-core = { path = "../proveit-core" }
+proveit-spatial = { path = "../proveit-spatial" }
+serde.workspace = true
+
+[lib]
+name = "proveit_accessibility"
+path = "src/lib.rs"

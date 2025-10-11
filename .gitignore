@@ -19,3 +19,67 @@ target
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# ML/LLM Model artifacts
+*.ckpt
+*.pth
+*.pkl
+*.h5
+*.onnx
+*.safetensors
+wandb/
+mlruns/
+checkpoints/
+
+# Experiment outputs
+experiments/outputs/
+logs/inference_*.log
+logs/training_*.log
+
+# Large datasets
+data/raw/
+data/processed/*.parquet
+data/cache/
+
+# Python (for ML tooling)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/

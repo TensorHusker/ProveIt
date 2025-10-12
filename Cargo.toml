@@ -20,6 +20,10 @@ authors = ["Alaina Scott"]
 name = "basic"
 path = "examples/basic.rs"
 
+[[example]]
+name = "prove_o1"
+path = "examples/prove_o1.rs"
+
 [dependencies]
 proveit-core = { path = "crates/proveit-core" }
 proveit-type-checker = { path = "crates/proveit-type-checker" }

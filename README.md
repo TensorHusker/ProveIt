@@ -9,7 +9,7 @@ Solve ARC-AGI-2 challenges through geometric reasoning and formal verification, 
 ## ✨ Features
 
 ### Core Technology
-- **O(1) Neural Type Checker**: Constant-time type verification using hash-based lookups and pre-computed type signatures
+- **O(1) Neural Type Checker**: Constant-time type verification using hash-based lookups and pre-computed type signatures ([See proof](PROOF_O1.md))
 - **Spatial Graph Engine**: Graph-based geometric reasoning with transformations (translation, rotation, scaling, reflection)
 - **Geometric Transformations**: Full 3D transformation pipeline with matrix operations
 - **GPU Acceleration**: WebGPU-based compute for parallel verification and transformations
@@ -183,6 +183,9 @@ cargo test -- --nocapture
 
 # Run tests for a specific crate
 cargo test -p proveit-type-checker
+
+# Run O(1) complexity proof
+cargo run --example prove_o1 --release
 ```
 
 ## 🤝 Contributing

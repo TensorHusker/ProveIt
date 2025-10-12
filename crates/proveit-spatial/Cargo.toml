@@ -1,0 +1,16 @@
+[package]
+name = "proveit-spatial"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proveit-core = { path = "../proveit-core" }
+nalgebra.workspace = true
+petgraph.workspace = true
+serde.workspace = true
+
+[lib]
+name = "proveit_spatial"
+path = "src/lib.rs"

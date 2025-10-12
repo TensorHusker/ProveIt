@@ -1,0 +1,15 @@
+[package]
+name = "proveit-formal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+proveit-core = { path = "../proveit-core" }
+proveit-type-checker = { path = "../proveit-type-checker" }
+serde.workspace = true
+
+[lib]
+name = "proveit_formal"
+path = "src/lib.rs"

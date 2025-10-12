@@ -1,0 +1,61 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/proveit-core",
+    "crates/proveit-type-checker",
+    "crates/proveit-spatial",
+    "crates/proveit-formal",
+    "crates/proveit-accessibility",
+    "crates/proveit-gpu",
+]
+
+[package]
+name = "proveit"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Alaina Scott"]
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[[example]]
+name = "prove_o1"
+path = "examples/prove_o1.rs"
+
+[dependencies]
+proveit-core = { path = "crates/proveit-core" }
+proveit-type-checker = { path = "crates/proveit-type-checker" }
+proveit-spatial = { path = "crates/proveit-spatial" }
+proveit-formal = { path = "crates/proveit-formal" }
+proveit-accessibility = { path = "crates/proveit-accessibility" }
+proveit-gpu = { path = "crates/proveit-gpu" }
+nalgebra.workspace = true
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Alaina Scott"]
+
+[workspace.dependencies]
+# Core dependencies
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+
+# GPU acceleration
+wgpu = "22.0"
+bytemuck = { version = "1.14", features = ["derive"] }
+
+# Spatial and geometry
+nalgebra = { version = "0.33", features = ["serde-serialize"] }
+petgraph = "0.6"
+
+# Accessibility
+cpal = "0.15"  # Audio library
+symphonia = "0.5"  # Audio decoding
+
+# WASM support
+wasm-bindgen = "0.2"

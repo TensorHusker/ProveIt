@@ -1,0 +1,81 @@
+[package]
+name = "proveit"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+license = "MIT"
+description = "Geometric construction environment for accessible formal verification"
+repository = "https://github.com/tensorhusker/ProveIt"
+keywords = ["formal-verification", "accessibility", "type-theory", "geometry", "theorem-proving"]
+categories = ["mathematics", "accessibility", "command-line-utilities"]
+
+[workspace]
+members = [
+    "crates/sctt-core",
+    "crates/geometry",
+    "crates/proof-engine",
+    "crates/accessibility",
+    "crates/butterfly-core",
+    "crates/butterfly-worker",
+    "crates/butterfly-coordinator",
+    "crates/cli",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+license = "MIT"
+
+[workspace.dependencies]
+
+[dependencies]
+# Core workspace crates
+sctt-core = { path = "crates/sctt-core" }
+geometry = { path = "crates/geometry" }
+proof-engine = { path = "crates/proof-engine" }
+accessibility = { path = "crates/accessibility" }
+butterfly-core = { path = "crates/butterfly-core" }
+cli = { path = "crates/cli" }
+
+# Essential utilities
+anyhow = "1.0"
+thiserror = "2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Async runtime
+tokio = { version = "1.41", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# CLI framework (needed for lib.rs from cli crate)
+clap = { version = "4.5", features = ["derive", "cargo"] }
+crossterm = "0.28"
+ratatui = "0.29"
+rustyline = "14.0"
+pest = "2.7"
+pest_derive = "2.7"
+
+[lib]
+path = "crates/cli/src/lib.rs"
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.6"
+quickcheck = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+
+[profile.bench]
+inherits = "release"
+
+[profile.dev]
+opt-level = 0
+debug = true

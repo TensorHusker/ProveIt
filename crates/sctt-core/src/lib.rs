@@ -24,7 +24,7 @@ pub use check::{check as check_type, infer, Context};
 pub use eval::eval;
 pub use normalize::normalize;
 pub use syntax::{Expr, Level, Name};
-pub use value::{Closure, Neutral, Value, Env};
+pub use value::{Closure, Env, Neutral, Value};
 
 /// Result type for SCTT operations
 pub type Result<T> = std::result::Result<T, Error>;
@@ -56,8 +56,6 @@ pub enum Error {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_basic_type_checking() {
         // Simple identity function: λx. x : (A : Type) → A → A

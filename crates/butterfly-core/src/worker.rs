@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime};
 
-use crate::{ComponentId, Result, TaskId, WorkerId};
+use crate::{ComponentId, TaskId, WorkerId};
 
 /// Capabilities of a worker node
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -7,20 +7,20 @@ use crate::syntax::{Dim, DimVar};
 use crate::value::Value;
 
 /// Differentiate a smooth path with respect to a dimension variable
-pub fn differentiate(path: &Value, dim: DimVar, order: u32) -> Value {
+pub fn differentiate(path: &Value, _dim: DimVar, _order: u32) -> Value {
     // Simplified: would compute actual derivative
     // using automatic differentiation on the path structure
     path.clone()
 }
 
 /// Integrate along a dimension from one endpoint to another
-pub fn integrate(integrand: &Value, dim: DimVar, from: Dim, to: Dim) -> Value {
+pub fn integrate(integrand: &Value, _dim: DimVar, _from: Dim, _to: Dim) -> Value {
     // Simplified: would compute actual integral
     integrand.clone()
 }
 
 /// Compute Taylor expansion around a point
-pub fn taylor_expand(function: &Value, point: &Value, order: u32) -> Value {
+pub fn taylor_expand(function: &Value, _point: &Value, _order: u32) -> Value {
     // Simplified: would compute Taylor series
     function.clone()
 }

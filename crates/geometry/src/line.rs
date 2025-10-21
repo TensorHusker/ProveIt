@@ -146,7 +146,7 @@ impl Line {
         let t1 = (dx * d2.y - dy * d2.x) / det;
         let t2 = (dx * d1.y - dy * d1.x) / det;
 
-        t1 >= 0.0 && t1 <= 1.0 && t2 >= 0.0 && t2 <= 1.0
+        (0.0..=1.0).contains(&t1) && (0.0..=1.0).contains(&t2)
     }
 }
 
@@ -167,9 +167,7 @@ fn estimate_proof_complexity(expr: &Expr) -> u32 {
                 + estimate_proof_complexity(right)
         }
         Expr::PathLam { body, .. } => 2 + estimate_proof_complexity(body),
-        Expr::PathApp { path, .. } => {
-            2 + estimate_proof_complexity(path)
-        }
+        Expr::PathApp { path, .. } => 2 + estimate_proof_complexity(path),
         _ => 1,
     }
 }

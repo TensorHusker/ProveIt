@@ -217,11 +217,10 @@ impl ConstructionGraph {
         // Also check the new line if we're at its source
         if let Some(new_id) = new_line {
             if let Some(line) = self.lines.get(&new_id) {
-                if line.from == point {
-                    if self.has_cycle_dfs(line.to, visited, rec_stack, new_line)? {
+                if line.from == point
+                    && self.has_cycle_dfs(line.to, visited, rec_stack, new_line)? {
                         return Ok(true);
                     }
-                }
             }
         }
 
@@ -306,11 +305,10 @@ impl ConstructionGraph {
         let mut rec_stack = HashSet::new();
 
         for &point_id in self.points.keys() {
-            if !visited.contains(&point_id) {
-                if self.has_cycle_dfs(point_id, &mut visited, &mut rec_stack, None)? {
+            if !visited.contains(&point_id)
+                && self.has_cycle_dfs(point_id, &mut visited, &mut rec_stack, None)? {
                     return Err(Error::DependencyCycle);
                 }
-            }
         }
 
         Ok(())
@@ -393,7 +391,7 @@ impl ConstructionGraph {
         }
 
         // Add edges
-        for (id, line) in &self.lines {
+        for (_id, line) in &self.lines {
             dot.push_str(&format!(
                 "  p{} -> p{} [label=\"{}\"];\n",
                 line.from.0, line.to.0, line.label

@@ -141,7 +141,7 @@ pub fn infer(ctx: &Context, expr: &Expr) -> Result<Value> {
             Ok(Value::VType(level))
         }
 
-        Expr::PathApp { path, dim } => {
+        Expr::PathApp { path, dim: _ } => {
             let path_ty = infer(ctx, path)?;
 
             // Extract base type and endpoints from path type
@@ -185,7 +185,7 @@ pub fn check(ctx: &Context, expr: &Expr, expected_ty: &Value) -> Result<()> {
         }
 
         (
-            Expr::PathLam { dim, body },
+            Expr::PathLam { dim: _, body },
             Value::VPath {
                 ty,
                 left: _,

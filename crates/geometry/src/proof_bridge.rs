@@ -1,7 +1,6 @@
 //! Proof Bridge: Bidirectional mapping between geometric constructions and SCTT proofs
 
 use sctt_core::{check_type, eval, infer, Context, Env, Expr, Value};
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::construction::{Construction, ConstructionGraph};
@@ -62,7 +61,9 @@ impl ProofBridge {
             .insert(format!("{:?}", point.proposition), point.id);
 
         // Add to context
-        self.context = self.context.extend(sctt_core::Name(point.label.clone()), ty);
+        self.context = self
+            .context
+            .extend(sctt_core::Name(point.label.clone()), ty);
 
         Ok(())
     }
@@ -152,7 +153,7 @@ impl ProofBridge {
         let mut composite = None;
 
         for &line_id in &path.lines {
-            let line = graph
+            let _line = graph
                 .lines
                 .get(&line_id)
                 .ok_or_else(|| Error::ProofCorrespondence("Line not found".to_string()))?;
@@ -270,8 +271,8 @@ impl ProofBridge {
                 codomain,
             } => {
                 // Pi type represents a proof obligation
-                let domain_point = self.analyze_and_build(domain, construction)?;
-                let codomain_point = self.analyze_and_build(codomain, construction)?;
+                let _domain_point = self.analyze_and_build(domain, construction)?;
+                let _codomain_point = self.analyze_and_build(codomain, construction)?;
 
                 // Create Pi point
                 let pi_point = Point::new(
@@ -459,7 +460,7 @@ impl ConstructionLayout {
 mod tests {
     use super::*;
     use nalgebra::Point2;
-    use sctt_core::Name;
+    
 
     #[test]
     fn test_proof_bridge_creation() {

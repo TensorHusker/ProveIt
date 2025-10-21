@@ -1,6 +1,6 @@
 //! Normalization: converting values back to expressions
 
-use crate::syntax::{Expr, Name};
+use crate::syntax::Expr;
 use crate::value::{Neutral, Value};
 
 /// Convert a value back to an expression (read-back)
@@ -152,6 +152,7 @@ fn normalize_neutral(neutral: &Neutral, level: u32) -> Expr {
 mod tests {
     use super::*;
     use crate::eval::eval;
+    use crate::syntax::Name;
     use crate::value::Env;
 
     #[test]

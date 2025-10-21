@@ -19,10 +19,7 @@ pub enum Value {
     },
 
     /// Lambda values (closures)
-    VLam {
-        name: Name,
-        closure: Closure,
-    },
+    VLam { name: Name, closure: Closure },
 
     /// Path type values
     VPath {

@@ -1,8 +1,6 @@
 //! Butterfly Coordinator Node
 
-use butterfly_core::{
-    FunctionalDecomposition, ModelId, ModelSplit, WorkerId,
-};
+use butterfly_core::{FunctionalDecomposition, ModelId, ModelSplit, WorkerId};
 use dashmap::DashMap;
 use std::sync::Arc;
 
@@ -12,8 +10,8 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("Starting Butterfly Coordinator");
 
-    let workers: Arc<DashMap<WorkerId, String>> = Arc::new(DashMap::new());
-    let models: Arc<DashMap<ModelId, ModelSplit>> = Arc::new(DashMap::new());
+    let _workers: Arc<DashMap<WorkerId, String>> = Arc::new(DashMap::new());
+    let _models: Arc<DashMap<ModelId, ModelSplit>> = Arc::new(DashMap::new());
 
     // Create example model split
     let decomp = FunctionalDecomposition::decompose_transformer(12, 768);

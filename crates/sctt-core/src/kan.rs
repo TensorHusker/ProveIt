@@ -7,14 +7,14 @@ use crate::syntax::{Dim, Face};
 use crate::value::Value;
 
 /// Composition operation (filling Kan cubes)
-pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) -> Value {
+pub fn comp(_ty: &Value, base: &Value, _faces: &[(Face, Value)], _target_dim: Dim) -> Value {
     // Simplified implementation: return base
     // Full implementation would compute Kan filling
     base.clone()
 }
 
 /// Coercion along a type family
-pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
+pub fn coe(_ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
     // If from == to, return base (identity coercion)
     if from == to {
         return base.clone();
@@ -26,7 +26,7 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
 }
 
 /// Homogeneous composition (special case where type is constant)
-pub fn hcomp(ty: &Value, base: &Value, faces: &[(Face, Value)]) -> Value {
+pub fn hcomp(_ty: &Value, base: &Value, _faces: &[(Face, Value)]) -> Value {
     // Simplified implementation
     base.clone()
 }
@@ -37,7 +37,7 @@ pub fn face_satisfied(face: &Face, dims: &[(u32, bool)]) -> bool {
         Face::Eq(var, val) => dims
             .iter()
             .find(|(v, _)| *v == var.0)
-            .map_or(false, |(_, v)| v == val),
+            .is_some_and(|(_, v)| v == val),
         Face::And(f1, f2) => face_satisfied(f1, dims) && face_satisfied(f2, dims),
         Face::True => true,
     }

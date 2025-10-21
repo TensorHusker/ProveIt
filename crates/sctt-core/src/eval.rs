@@ -1,7 +1,7 @@
 //! Evaluation: converting syntax to semantic values
 
-use crate::syntax::{Dim, DimVar, Expr};
-use crate::value::{Closure, DimClosure, DimEnv, Env, Neutral, Value};
+use crate::syntax::{Dim, Expr};
+use crate::value::{Closure, DimClosure, DimEnv, Env, Value};
 use std::sync::Arc;
 
 /// Evaluate an expression in an environment to produce a value
@@ -91,29 +91,29 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
 
         Expr::Comp { ty, base, faces: _ } => {
             // Simplified Kan composition
-            let ty_val = eval_with_dims(ty, env, dim_env);
-            let base_val = eval_with_dims(base, env, dim_env);
+            let _ty_val = eval_with_dims(ty, env, dim_env);
+            
             // For now, return the base; full implementation would handle faces
-            base_val
+            eval_with_dims(base, env, dim_env)
         }
 
         Expr::Coe {
             ty_fam,
-            from,
-            to,
+            from: _,
+            to: _,
             base,
         } => {
             // Simplified coercion
             let _ty_fam_val = eval_with_dims(ty_fam, env, dim_env);
-            let base_val = eval_with_dims(base, env, dim_env);
+            
             // For now, identity coercion
-            base_val
+            eval_with_dims(base, env, dim_env)
         }
 
-        Expr::HComp { ty, base, faces: _ } => {
+        Expr::HComp { ty: _, base, faces: _ } => {
             // Simplified homogeneous composition
-            let base_val = eval_with_dims(base, env, dim_env);
-            base_val
+
+            eval_with_dims(base, env, dim_env)
         }
 
         Expr::Glue {
@@ -121,11 +121,11 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
             equivalences: _,
         } => {
             // Simplified glue
-            let base_val = eval_with_dims(base, env, dim_env);
-            base_val
+            
+            eval_with_dims(base, env, dim_env)
         }
 
-        Expr::Diff { order, dim, expr } => {
+        Expr::Diff { order: _, dim: _, expr } => {
             // Differential operator - simplified
             let _expr_val = eval_with_dims(expr, env, dim_env);
             // Placeholder: actual implementation would compute derivative
@@ -133,9 +133,9 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
         }
 
         Expr::Integral {
-            dim,
-            from,
-            to,
+            dim: _,
+            from: _,
+            to: _,
             expr,
         } => {
             // Integral operator - simplified
@@ -144,7 +144,7 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
             Value::VType(0) // Temporary
         }
 
-        Expr::Taylor { order, point, expr } => {
+        Expr::Taylor { order: _, point, expr } => {
             // Taylor expansion - simplified
             let _point_val = eval_with_dims(point, env, dim_env);
             let _expr_val = eval_with_dims(expr, env, dim_env);
@@ -160,7 +160,7 @@ fn resolve_dim(dim: &Dim, dim_env: &DimEnv) -> Dim {
         Dim::Var(var) => dim_env
             .get(var.0 as usize)
             .cloned()
-            .unwrap_or_else(|| Dim::Var(*var)),
+            .unwrap_or(Dim::Var(*var)),
         d => d.clone(),
     }
 }

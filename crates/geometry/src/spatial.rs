@@ -92,10 +92,10 @@ impl SpatialAnalyzer {
     /// Check if two lines are parallel
     pub fn are_parallel(
         &self,
-        line1: &Line,
+        _line1: &Line,
         p1_from: &Point,
         p1_to: &Point,
-        line2: &Line,
+        _line2: &Line,
         p2_from: &Point,
         p2_to: &Point,
     ) -> bool {
@@ -110,10 +110,10 @@ impl SpatialAnalyzer {
     /// Check if two lines are perpendicular
     pub fn are_perpendicular(
         &self,
-        line1: &Line,
+        _line1: &Line,
         p1_from: &Point,
         p1_to: &Point,
-        line2: &Line,
+        _line2: &Line,
         p2_from: &Point,
         p2_to: &Point,
     ) -> bool {
@@ -129,7 +129,7 @@ impl SpatialAnalyzer {
     pub fn is_incident(
         &self,
         point: &Point,
-        line: &Line,
+        _line: &Line,
         line_from: &Point,
         line_to: &Point,
     ) -> bool {
@@ -141,10 +141,10 @@ impl SpatialAnalyzer {
     /// Find intersection point of two lines
     pub fn find_intersection(
         &self,
-        line1: &Line,
+        _line1: &Line,
         p1_from: &Point,
         p1_to: &Point,
-        line2: &Line,
+        _line2: &Line,
         p2_from: &Point,
         p2_to: &Point,
     ) -> Option<Point2<f64>> {
@@ -285,14 +285,13 @@ impl SpatialAnalyzer {
                 let line_from = points.iter().find(|p| p.id == line.from).unwrap();
                 let line_to = points.iter().find(|p| p.id == line.to).unwrap();
 
-                if point.id != line.from && point.id != line.to {
-                    if self.is_incident(point, line, line_from, line_to) {
+                if point.id != line.from && point.id != line.to
+                    && self.is_incident(point, line, line_from, line_to) {
                         relations.push(SpatialRelation::Incidence {
                             point: point.id,
                             line: line.id,
                         });
                     }
-                }
             }
         }
 

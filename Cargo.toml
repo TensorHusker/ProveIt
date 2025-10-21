@@ -1,5 +1,14 @@
 [workspace]
-members = ["crates/sctt-core"]
+members = [
+    "crates/sctt-core",
+    "crates/proof-engine",
+    "crates/geometry",
+    "crates/accessibility",
+    "crates/butterfly-core",
+    "crates/butterfly-coordinator",
+    "crates/butterfly-worker",
+    "crates/cli",
+]
 resolver = "2"
 
 [workspace.package]

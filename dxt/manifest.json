@@ -1,0 +1,45 @@
+{
+  "name": "proveit",
+  "version": "0.1.0",
+  "description": "ProveIt - Interactive proof assistant with SCTT (Smooth Cubical Type Theory) and geometric proof construction. Provides type checking, proof building, and multi-modal mathematical reasoning.",
+  "author": "ProveIt Team",
+  "license": "MIT",
+  "homepage": "https://github.com/tensorhusker/ProveIt",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tensorhusker/ProveIt.git"
+  },
+  "mcp": {
+    "command": "node",
+    "args": ["dist/index.js"],
+    "env": {
+      "PROVEIT_PATH": "${workspaceFolder}",
+      "PROVEIT_LOG_LEVEL": "info"
+    }
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false
+  },
+  "categories": [
+    "mathematics",
+    "formal-verification",
+    "type-theory",
+    "proof-assistant"
+  ],
+  "keywords": [
+    "proof-assistant",
+    "type-theory",
+    "sctt",
+    "cubical",
+    "formal-verification",
+    "theorem-proving",
+    "accessibility",
+    "geometric-proofs"
+  ],
+  "icon": "icon.png",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

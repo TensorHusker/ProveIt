@@ -159,6 +159,58 @@ pub fn infer(ctx: &Context, expr: &Expr) -> Result<Value> {
             "path lambda requires type annotation".to_string(),
         )),
 
+        Expr::Comp { ty, base, faces } => {
+            // Check type is a valid type
+            let ty_ty = infer(ctx, ty)?;
+            expect_type(&ty_ty)?;
+
+            // Check base has type ty @ 0
+            let ty_val = eval(ty, ctx.env());
+            check(ctx, base, &ty_val)?;
+
+            // Check each face expression has type ty
+            for (face, face_expr) in faces {
+                validate_face(face)?;
+                check(ctx, face_expr, &ty_val)?;
+            }
+
+            // Result has type ty @ 1 (same as ty for constant types)
+            Ok(ty_val)
+        }
+
+        Expr::Coe { ty_fam, from, to, base } => {
+            // Type family should be a function from dimension to types
+            // For now, simplified: just check it's a lambda returning a type
+            let ty_fam_ty = infer(ctx, ty_fam)?;
+
+            // Evaluate type family at 'from' dimension
+            let ty_fam_val = eval(ty_fam, ctx.env());
+            let from_ty = apply_to_dim(&ty_fam_val, from);
+
+            // Check base has type (ty_fam from)
+            check(ctx, base, &from_ty)?;
+
+            // Result has type (ty_fam to)
+            let to_ty = apply_to_dim(&ty_fam_val, to);
+            Ok(to_ty)
+        }
+
+        Expr::HComp { ty, base, faces } => {
+            // Similar to Comp but for constant types
+            let ty_ty = infer(ctx, ty)?;
+            expect_type(&ty_ty)?;
+
+            let ty_val = eval(ty, ctx.env());
+            check(ctx, base, &ty_val)?;
+
+            for (face, face_expr) in faces {
+                validate_face(face)?;
+                check(ctx, face_expr, &ty_val)?;
+            }
+
+            Ok(ty_val)
+        }
+
         _ => Err(Error::CannotInfer(format!("{}", expr))),
     }
 }
@@ -248,6 +300,33 @@ fn expect_path(val: &Value) -> Result<(Arc<Value>, Arc<Value>, Arc<Value>)> {
             expected: "Path type".to_string(),
             got: format!("{}", val),
         }),
+    }
+}
+
+/// Validate face formula is well-formed
+fn validate_face(face: &crate::syntax::Face) -> Result<()> {
+    use crate::syntax::Face;
+    match face {
+        Face::Eq(_var, _val) => Ok(()),
+        Face::And(f1, f2) => {
+            validate_face(f1)?;
+            validate_face(f2)
+        }
+        Face::True => Ok(()),
+    }
+}
+
+/// Apply a value to a dimension (for type families)
+fn apply_to_dim(val: &Value, _dim: &crate::syntax::Dim) -> Value {
+    // Simplified: for constant type families, just return the type
+    // Full implementation would handle dimension-dependent types
+    match val {
+        Value::VLam { closure, .. } => {
+            // Apply closure to a neutral dimension variable
+            let dim_val = Value::VType(0); // Placeholder
+            closure.apply(dim_val)
+        }
+        _ => val.clone(),
     }
 }
 

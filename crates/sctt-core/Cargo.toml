@@ -14,3 +14,8 @@ num-traits = "0.2"
 
 [dev-dependencies]
 proptest = "1.6"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "kan_benchmarks"
+harness = false

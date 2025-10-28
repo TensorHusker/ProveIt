@@ -89,31 +89,50 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
             }
         }
 
-        Expr::Comp { ty, base, faces: _ } => {
-            // Simplified Kan composition
-            let _ty_val = eval_with_dims(ty, env, dim_env);
-            
-            // For now, return the base; full implementation would handle faces
-            eval_with_dims(base, env, dim_env)
+        Expr::Comp { ty, base, faces } => {
+            // Full Kan composition implementation
+            let ty_val = eval_with_dims(ty, env, dim_env);
+            let base_val = eval_with_dims(base, env, dim_env);
+            let faces_val: Vec<(crate::syntax::Face, Value)> = faces
+                .iter()
+                .map(|(face, expr)| {
+                    (face.clone(), eval_with_dims(expr, env, dim_env))
+                })
+                .collect();
+
+            // Call actual Kan composition from kan.rs
+            crate::kan::comp(&ty_val, &base_val, &faces_val, Dim::One)
         }
 
         Expr::Coe {
             ty_fam,
-            from: _,
-            to: _,
+            from,
+            to,
             base,
         } => {
-            // Simplified coercion
-            let _ty_fam_val = eval_with_dims(ty_fam, env, dim_env);
-            
-            // For now, identity coercion
-            eval_with_dims(base, env, dim_env)
+            // Full coercion implementation
+            let ty_fam_val = eval_with_dims(ty_fam, env, dim_env);
+            let base_val = eval_with_dims(base, env, dim_env);
+            let from_resolved = resolve_dim(from, dim_env);
+            let to_resolved = resolve_dim(to, dim_env);
+
+            // Call actual Kan coercion from kan.rs
+            crate::kan::coe(&ty_fam_val, from_resolved, to_resolved, &base_val)
         }
 
-        Expr::HComp { ty: _, base, faces: _ } => {
-            // Simplified homogeneous composition
+        Expr::HComp { ty, base, faces } => {
+            // Full homogeneous composition implementation
+            let ty_val = eval_with_dims(ty, env, dim_env);
+            let base_val = eval_with_dims(base, env, dim_env);
+            let faces_val: Vec<(crate::syntax::Face, Value)> = faces
+                .iter()
+                .map(|(face, expr)| {
+                    (face.clone(), eval_with_dims(expr, env, dim_env))
+                })
+                .collect();
 
-            eval_with_dims(base, env, dim_env)
+            // Call homogeneous composition from kan.rs
+            crate::kan::hcomp(&ty_val, &base_val, &faces_val)
         }
 
         Expr::Glue {

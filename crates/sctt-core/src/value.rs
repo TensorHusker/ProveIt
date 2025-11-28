@@ -2,7 +2,7 @@
 //!
 //! Values represent fully evaluated terms in normal form.
 
-use crate::syntax::{Dim, DimVar, Level, Name};
+use crate::syntax::{Dim, DimVar, Face, Level, Name};
 use std::sync::Arc;
 
 /// Semantic values (results of evaluation)
@@ -109,19 +109,27 @@ pub enum Neutral {
     /// Path application to neutral
     NPathApp { path: Box<Neutral>, dim: Dim },
 
-    /// Composition (Kan operation)
+    /// Composition (Kan operation) - stores full face system for proper normalization
     NComp {
         ty: Arc<Value>,
-        base: Box<Neutral>,
-        // Simplified for now
+        base: Arc<Value>,
+        faces: Vec<(Face, Value)>,
+        target_dim: Dim,
     },
 
-    /// Coercion
+    /// Homogeneous composition (constant type composition)
+    NHComp {
+        ty: Arc<Value>,
+        base: Arc<Value>,
+        faces: Vec<(Face, Value)>,
+    },
+
+    /// Coercion along type family
     NCoe {
         ty_fam: Arc<Value>,
         from: Dim,
         to: Dim,
-        base: Box<Neutral>,
+        base: Arc<Value>,
     },
 }
 

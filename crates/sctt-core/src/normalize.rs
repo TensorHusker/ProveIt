@@ -118,14 +118,38 @@ fn normalize_neutral(neutral: &Neutral, level: u32) -> Expr {
             }
         }
 
-        Neutral::NComp { ty, base } => {
+        Neutral::NComp {
+            ty,
+            base,
+            faces,
+            target_dim: _,
+        } => {
             let ty_expr = normalize_at_level(ty, level);
-            let base_expr = normalize_neutral(base, level);
+            let base_expr = normalize_at_level(base, level);
+            let faces_expr: Vec<(crate::syntax::Face, Expr)> = faces
+                .iter()
+                .map(|(f, v)| (f.clone(), normalize_at_level(v, level)))
+                .collect();
 
             Expr::Comp {
                 ty: Box::new(ty_expr),
                 base: Box::new(base_expr),
-                faces: Vec::new(), // Simplified
+                faces: faces_expr,
+            }
+        }
+
+        Neutral::NHComp { ty, base, faces } => {
+            let ty_expr = normalize_at_level(ty, level);
+            let base_expr = normalize_at_level(base, level);
+            let faces_expr: Vec<(crate::syntax::Face, Expr)> = faces
+                .iter()
+                .map(|(f, v)| (f.clone(), normalize_at_level(v, level)))
+                .collect();
+
+            Expr::HComp {
+                ty: Box::new(ty_expr),
+                base: Box::new(base_expr),
+                faces: faces_expr,
             }
         }
 
@@ -136,7 +160,7 @@ fn normalize_neutral(neutral: &Neutral, level: u32) -> Expr {
             base,
         } => {
             let ty_fam_expr = normalize_at_level(ty_fam, level);
-            let base_expr = normalize_neutral(base, level);
+            let base_expr = normalize_at_level(base, level);
 
             Expr::Coe {
                 ty_fam: Box::new(ty_fam_expr),

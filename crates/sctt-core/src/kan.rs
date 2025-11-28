@@ -9,7 +9,7 @@
 //! - "Cartesian Cubical Computational Type Theory" by Angiuli, Favonia, Harper (2018)
 
 use crate::syntax::{Dim, Face};
-use crate::value::{Value, Neutral, DimEnv};
+use crate::value::{Value, Neutral};
 use std::sync::Arc;
 
 /// Composition operation (filling Kan cubes)
@@ -43,14 +43,9 @@ pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) 
     // Case 3: Composition by type
     match ty {
         // Composition in Pi types: pointwise composition
-        Value::VPi { domain, closure, .. } => {
+        Value::VPi { .. } => {
             // For functions, compose pointwise
             // comp (x : A) -> B(x) u sys = λx. comp B(x) (u x) [(φ → sys x)]
-
-            // Create a closure that composes for each argument
-            let base_fn = base.clone();
-            let faces_fn = faces.to_vec();
-            let target = target_dim.clone();
 
             // For now, return a neutral term representing the composition
             // Full implementation would create a proper closure
@@ -58,30 +53,26 @@ pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) 
                 ty: Arc::new(ty.clone()),
                 neutral: Neutral::NComp {
                     ty: Arc::new(ty.clone()),
-                    base: Box::new(match base {
-                        Value::VNeutral { neutral, .. } => neutral.clone(),
-                        _ => Neutral::NVar(crate::syntax::Name("comp_base".to_string()), 0),
-                    }),
+                    base: Arc::new(base.clone()),
+                    faces: faces.to_vec(),
+                    target_dim: target_dim.clone(),
                 },
             }
         }
 
         // Composition in Path types
-        Value::VPath { ty: path_ty, left, right } => {
+        Value::VPath { .. } => {
             // comp (Path A x y) u sys = <i> comp A (u i) [(φ → sys i)]
             // Returns a path that composes the base path with face constraints
-
-            let base_path = base.clone();
 
             // Create a dimension closure for the composed path
             Value::VNeutral {
                 ty: Arc::new(ty.clone()),
                 neutral: Neutral::NComp {
                     ty: Arc::new(ty.clone()),
-                    base: Box::new(match base {
-                        Value::VNeutral { neutral, .. } => neutral.clone(),
-                        _ => Neutral::NVar(crate::syntax::Name("path_base".to_string()), 0),
-                    }),
+                    base: Arc::new(base.clone()),
+                    faces: faces.to_vec(),
+                    target_dim: target_dim.clone(),
                 },
             }
         }
@@ -98,10 +89,9 @@ pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) 
                 ty: Arc::new(ty.clone()),
                 neutral: Neutral::NComp {
                     ty: Arc::new(ty.clone()),
-                    base: Box::new(match base {
-                        Value::VNeutral { neutral, .. } => neutral.clone(),
-                        _ => Neutral::NVar(crate::syntax::Name("comp_base".to_string()), 0),
-                    }),
+                    base: Arc::new(base.clone()),
+                    faces: faces.to_vec(),
+                    target_dim: target_dim.clone(),
                 },
             }
         }
@@ -157,7 +147,7 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
         }
 
         // Coercion in Pi types: transport pointwise
-        Value::VPi { domain, closure, .. } => {
+        Value::VPi { .. } => {
             // coe (λi. (x : A(i)) → B(i,x)) r r' u =
             //   λx. coe (λi. B(i, coe (λj. A(j)) r' r x)) r r' (u (coe (λj. A(j)) r r' x))
 
@@ -168,16 +158,13 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
                     ty_fam: Arc::new(ty_family.clone()),
                     from: from.clone(),
                     to: to.clone(),
-                    base: Box::new(match base {
-                        Value::VNeutral { neutral, .. } => neutral.clone(),
-                        _ => Neutral::NVar(crate::syntax::Name("coe_base".to_string()), 0),
-                    }),
+                    base: Arc::new(base.clone()),
                 },
             }
         }
 
         // Coercion in Path types
-        Value::VPath { ty, left, right } => {
+        Value::VPath { .. } => {
             // coe (λi. Path (A i) (l i) (r i)) r r' u =
             //   <j> coe (λi. A i) r r' (u j)
 
@@ -187,10 +174,7 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
                     ty_fam: Arc::new(ty_family.clone()),
                     from: from.clone(),
                     to: to.clone(),
-                    base: Box::new(match base {
-                        Value::VNeutral { neutral, .. } => neutral.clone(),
-                        _ => Neutral::NVar(crate::syntax::Name("path_coe_base".to_string()), 0),
-                    }),
+                    base: Arc::new(base.clone()),
                 },
             }
         }
@@ -203,10 +187,7 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
                     ty_fam: Arc::new(ty_family.clone()),
                     from: from.clone(),
                     to: to.clone(),
-                    base: Box::new(match base {
-                        Value::VNeutral { neutral, .. } => neutral.clone(),
-                        _ => Neutral::NVar(crate::syntax::Name("coe_base".to_string()), 0),
-                    }),
+                    base: Arc::new(base.clone()),
                 },
             }
         }

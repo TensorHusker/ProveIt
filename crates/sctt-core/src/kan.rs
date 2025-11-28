@@ -43,20 +43,89 @@ pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) 
     // Case 3: Composition by type
     match ty {
         // Composition in Pi types: pointwise composition
-        Value::VPi { .. } => {
-            // For functions, compose pointwise
-            // comp (x : A) -> B(x) u sys = λx. comp B(x) (u x) [(φ → sys x)]
+        // comp ((x : A) -> B(x)) u sys = λx. comp B(x) (u x) [(φ → sys x)]
+        Value::VPi {
+            name,
+            domain,
+            closure: codomain_closure,
+        } => {
+            // Build the result lambda using semantic computation
+            // Strategy: Create a closure that captures everything needed and
+            // builds the Expr body using normalized forms with proper indices
 
-            // For now, return a neutral term representing the composition
-            // Full implementation would create a proper closure
-            Value::VNeutral {
-                ty: Arc::new(ty.clone()),
-                neutral: Neutral::NComp {
-                    ty: Arc::new(ty.clone()),
-                    base: Arc::new(base.clone()),
-                    faces: faces.to_vec(),
-                    target_dim: target_dim.clone(),
-                },
+            use crate::syntax::{Expr, Name as SyntaxName};
+            use crate::normalize::normalize;
+
+            // Build environment: [codomain_ty_expr, base, face_val_0, face_val_1, ...]
+            // After lambda binds x: x is at 0, others shift up by 1
+            let mut closure_env = im::Vector::new();
+
+            // Store the codomain type (we need it as a value to normalize)
+            // We'll apply the codomain closure to a fresh var and normalize
+            let fresh_var = Value::VNeutral {
+                ty: domain.clone(),
+                neutral: Neutral::NVar(name.clone(), 0),
+            };
+            let codomain_at_var = codomain_closure.apply(fresh_var);
+            let codomain_expr = normalize(&codomain_at_var);
+
+            // Store base in env at index 0
+            closure_env.push_back(base.clone());
+
+            // Store each face value in env
+            let mut face_env_indices = Vec::new();
+            for (_, face_val) in faces.iter() {
+                face_env_indices.push(closure_env.len() as u32);
+                closure_env.push_back(face_val.clone());
+            }
+
+            // Build the lambda body expression
+            // Closure.apply pushes arg to the BACK of env, so:
+            // - Values in closure_env keep their original indices
+            // - x (lambda arg) is at the highest index (closure_env.len())
+            let x_index = closure_env.len() as u32;
+            let x_var = Expr::Var(name.clone(), x_index);
+
+            // codomain_expr was normalized with x at index 0
+            // We need to substitute index 0 with the actual x_var at x_index
+            let codomain_adjusted = codomain_expr.subst(0, &x_var);
+
+            // base(x) - base is at index 0 in env (unchanged after lambda)
+            let base_applied = Expr::App {
+                func: Box::new(Expr::Var(SyntaxName("base".to_string()), 0)),
+                arg: Box::new(x_var.clone()),
+            };
+
+            // Build face applications: each face value applied to x
+            let faces_applied: Vec<(Face, Expr)> = faces
+                .iter()
+                .enumerate()
+                .map(|(i, (face, _))| {
+                    // face_val is at face_env_indices[i] in env (unchanged)
+                    let face_applied = Expr::App {
+                        func: Box::new(Expr::Var(
+                            SyntaxName(format!("face{}", i)),
+                            face_env_indices[i],
+                        )),
+                        arg: Box::new(x_var.clone()),
+                    };
+                    (face.clone(), face_applied)
+                })
+                .collect();
+
+            // Build: comp B(x) (base x) [(φ → face x)]
+            let body = Expr::Comp {
+                ty: Box::new(codomain_adjusted),
+                base: Box::new(base_applied),
+                faces: faces_applied,
+            };
+
+            // Create the closure and return VLam
+            let result_closure = crate::value::Closure::new(closure_env, body);
+
+            Value::VLam {
+                name: name.clone(),
+                closure: result_closure,
             }
         }
 

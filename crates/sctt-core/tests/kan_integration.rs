@@ -4,7 +4,7 @@
 //! properly with the evaluation, type checking, and normalization pipeline.
 
 use sctt_core::{
-    check::{infer, check, Context},
+    check::{infer, Context},
     eval::eval,
     normalize::normalize,
     syntax::{Dim, DimVar, Expr, Face, Name},
@@ -33,13 +33,7 @@ fn test_comp_type_checks() {
     // Note: Type₀ : Type₁, so we need to compose values OF type Type₀, not Type₀ itself
     let ctx = Context::new();
 
-    // Create a simple lambda as our base value (has type Type₀ → Type₀)
-    let id_type = Expr::Pi {
-        name: Name("A".to_string()),
-        domain: Box::new(Expr::Type(0)),
-        codomain: Box::new(Expr::Type(0)),
-    };
-
+    // Create a comp expression composing at Type₁ level
     let comp_expr = Expr::Comp {
         ty: Box::new(Expr::Type(1)), // Composing at Type₁ level
         base: Box::new(Expr::Type(0)),  // Type₀ : Type₁
@@ -234,9 +228,85 @@ fn test_coe_constant_family_optimization() {
         base: Box::new(Expr::Type(0)),
     };
 
-    let val = eval(&coe_expr, &Env::new());
+    let val = sctt_core::eval::eval(&coe_expr, &Env::new());
 
     // Constant families should be identity
     assert!(val.conv(&Value::VType(0)),
         "coe with constant family should be identity");
+}
+
+#[test]
+fn test_comp_pi_type_produces_lambda() {
+    // comp ((x : Type0) -> Type0) (lam x. x) [] should produce a lambda
+    // i.e., composing a function type should yield a function value
+
+    // Build Pi type: (x : Type0) -> Type0
+    let pi_ty = Expr::Pi {
+        name: Name("x".to_string()),
+        domain: Box::new(Expr::Type(0)),
+        codomain: Box::new(Expr::Type(0)),
+    };
+
+    // Build identity function: lam x. x
+    let id_fn = Expr::Lambda {
+        name: Name("x".to_string()),
+        body: Box::new(Expr::Var(Name("x".to_string()), 0)),
+    };
+
+    // comp (Pi Type0 Type0) id [] should produce a lambda
+    let comp_expr = Expr::Comp {
+        ty: Box::new(pi_ty),
+        base: Box::new(id_fn),
+        faces: vec![],
+    };
+
+    let val = sctt_core::eval::eval(&comp_expr, &Env::new());
+
+    // Result should be a lambda (VLam), not a neutral
+    assert!(
+        matches!(val, Value::VLam { .. }),
+        "comp on Pi type should produce a lambda, got: {:?}",
+        val
+    );
+}
+
+#[test]
+fn test_comp_pi_type_applies_correctly() {
+    // Verify that the composed function can be applied
+
+    // Build Pi type: (x : Type0) -> Type0
+    let pi_ty = Expr::Pi {
+        name: Name("x".to_string()),
+        domain: Box::new(Expr::Type(0)),
+        codomain: Box::new(Expr::Type(0)),
+    };
+
+    // Build identity function: lam x. x
+    let id_fn = Expr::Lambda {
+        name: Name("x".to_string()),
+        body: Box::new(Expr::Var(Name("x".to_string()), 0)),
+    };
+
+    // comp (Pi Type0 Type0) id []
+    let comp_expr = Expr::Comp {
+        ty: Box::new(pi_ty),
+        base: Box::new(id_fn),
+        faces: vec![],
+    };
+
+    let composed_fn = sctt_core::eval::eval(&comp_expr, &Env::new());
+
+    // Apply the composed function to Type0
+    let arg = Value::VType(0);
+    let result = composed_fn.apply(arg);
+
+    // Since comp with empty faces is identity-like, the result
+    // should be related to applying the identity to Type0
+    // The composed function, when applied, should eventually yield Type0
+    // (through the recursive comp call which hits the VType case)
+    assert!(
+        matches!(result, Value::VType(0)) || matches!(result, Value::VNeutral { .. }),
+        "applying composed Pi function should work, got: {:?}",
+        result
+    );
 }

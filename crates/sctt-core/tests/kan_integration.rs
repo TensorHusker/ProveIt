@@ -310,3 +310,84 @@ fn test_comp_pi_type_applies_correctly() {
         result
     );
 }
+
+#[test]
+fn test_comp_path_type_produces_path_lambda() {
+    // comp (Path Type0 Type0 Type0) <i>Type0 [] should produce a path lambda
+    // i.e., composing a path type should yield a path value
+
+    // Build Path type: Path Type0 Type0 Type0
+    let path_ty = Expr::Path {
+        ty: Box::new(Expr::Type(0)),
+        left: Box::new(Expr::Type(0)),
+        right: Box::new(Expr::Type(0)),
+    };
+
+    // Build constant path: <i> Type0
+    let const_path = Expr::PathLam {
+        dim: DimVar(0),
+        body: Box::new(Expr::Type(0)),
+    };
+
+    // comp (Path Type0 Type0 Type0) (<i>Type0) []
+    let comp_expr = Expr::Comp {
+        ty: Box::new(path_ty),
+        base: Box::new(const_path),
+        faces: vec![],
+    };
+
+    let val = sctt_core::eval::eval(&comp_expr, &Env::new());
+
+    // Result should be a path lambda (VPathLam), not a neutral
+    assert!(
+        matches!(val, Value::VPathLam { .. }),
+        "comp on Path type should produce a path lambda, got: {:?}",
+        val
+    );
+}
+
+#[test]
+fn test_comp_path_type_applies_at_endpoints() {
+    // Verify that composed path has correct endpoints
+
+    // Build Path type: Path Type0 Type0 Type1
+    let path_ty = Expr::Path {
+        ty: Box::new(Expr::Type(0)),
+        left: Box::new(Expr::Type(0)),
+        right: Box::new(Expr::Type(1)),
+    };
+
+    // Build constant path: <i> Type0
+    let const_path = Expr::PathLam {
+        dim: DimVar(0),
+        body: Box::new(Expr::Type(0)),
+    };
+
+    // comp (Path Type0 Type0 Type1) (<i>Type0) []
+    let comp_expr = Expr::Comp {
+        ty: Box::new(path_ty),
+        base: Box::new(const_path),
+        faces: vec![],
+    };
+
+    let composed_path = sctt_core::eval::eval(&comp_expr, &Env::new());
+
+    // Apply at dimension 0 (left endpoint)
+    let at_zero = composed_path.apply_path(Dim::Zero);
+
+    // Apply at dimension 1 (right endpoint)
+    let at_one = composed_path.apply_path(Dim::One);
+
+    // At endpoints, we should get the constrained values (left and right)
+    // Due to the face system [(i=0 -> left), (i=1 -> right)]
+    assert!(
+        matches!(at_zero, Value::VType(0)) || matches!(at_zero, Value::VNeutral { .. }),
+        "path at 0 should be left endpoint, got: {:?}",
+        at_zero
+    );
+    assert!(
+        matches!(at_one, Value::VType(1)) || matches!(at_one, Value::VNeutral { .. }),
+        "path at 1 should be right endpoint, got: {:?}",
+        at_one
+    );
+}

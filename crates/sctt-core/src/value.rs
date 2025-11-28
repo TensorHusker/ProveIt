@@ -87,7 +87,7 @@ impl DimClosure {
     pub fn apply(&self, dim: Dim) -> Value {
         let mut new_dim_env = self.dim_env.clone();
         new_dim_env.push_back(dim);
-        crate::eval::eval(&self.body, &self.env)
+        crate::eval::eval_with_dims(&self.body, &self.env, &new_dim_env)
     }
 }
 

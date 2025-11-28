@@ -96,7 +96,9 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
             let faces_val: Vec<(crate::syntax::Face, Value)> = faces
                 .iter()
                 .map(|(face, expr)| {
-                    (face.clone(), eval_with_dims(expr, env, dim_env))
+                    // Resolve dimension variables in the face against dim_env
+                    let resolved_face = resolve_face(face, dim_env);
+                    (resolved_face, eval_with_dims(expr, env, dim_env))
                 })
                 .collect();
 
@@ -127,7 +129,9 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
             let faces_val: Vec<(crate::syntax::Face, Value)> = faces
                 .iter()
                 .map(|(face, expr)| {
-                    (face.clone(), eval_with_dims(expr, env, dim_env))
+                    // Resolve dimension variables in the face against dim_env
+                    let resolved_face = resolve_face(face, dim_env);
+                    (resolved_face, eval_with_dims(expr, env, dim_env))
                 })
                 .collect();
 
@@ -181,6 +185,48 @@ fn resolve_dim(dim: &Dim, dim_env: &DimEnv) -> Dim {
             .cloned()
             .unwrap_or(Dim::Var(*var)),
         d => d.clone(),
+    }
+}
+
+/// Resolve dimension variables in a face formula
+/// Converts Face::Eq(DimVar(i), b) to Face::True or keeps as-is based on dim_env
+fn resolve_face(face: &crate::syntax::Face, dim_env: &DimEnv) -> crate::syntax::Face {
+    use crate::syntax::Face;
+
+    match face {
+        Face::Eq(var, val) => {
+            // Look up the dimension variable in dim_env
+            match dim_env.get(var.0 as usize) {
+                Some(Dim::Zero) => {
+                    // Dimension is 0, check if val is false (representing 0)
+                    if !*val {
+                        Face::True // i=0 is satisfied when i IS 0
+                    } else {
+                        // i=1 is NOT satisfied when i IS 0 - return impossible face
+                        Face::Eq(*var, *val) // Keep as-is, won't be satisfied
+                    }
+                }
+                Some(Dim::One) => {
+                    // Dimension is 1, check if val is true (representing 1)
+                    if *val {
+                        Face::True // i=1 is satisfied when i IS 1
+                    } else {
+                        // i=0 is NOT satisfied when i IS 1 - return impossible face
+                        Face::Eq(*var, *val) // Keep as-is, won't be satisfied
+                    }
+                }
+                _ => Face::Eq(*var, *val), // Keep as-is if not resolved
+            }
+        }
+        Face::And(f1, f2) => {
+            let r1 = resolve_face(f1, dim_env);
+            let r2 = resolve_face(f2, dim_env);
+            match (&r1, &r2) {
+                (Face::True, f) | (f, Face::True) => f.clone(),
+                _ => Face::And(Box::new(r1), Box::new(r2)),
+            }
+        }
+        Face::True => Face::True,
     }
 }
 

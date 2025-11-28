@@ -130,19 +130,86 @@ pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) 
         }
 
         // Composition in Path types
-        Value::VPath { .. } => {
-            // comp (Path A x y) u sys = <i> comp A (u i) [(φ → sys i)]
-            // Returns a path that composes the base path with face constraints
+        // comp (Path A a b) u sys = <i> hcomp A (u @ i) [(i=0 -> a), (i=1 -> b), (φ -> sys @ i)]
+        Value::VPath { ty: path_ty, left, right } => {
+            use crate::syntax::{DimVar, Expr, Name as SyntaxName};
+            use crate::value::DimClosure;
 
-            // Create a dimension closure for the composed path
-            Value::VNeutral {
-                ty: Arc::new(ty.clone()),
-                neutral: Neutral::NComp {
-                    ty: Arc::new(ty.clone()),
-                    base: Arc::new(base.clone()),
-                    faces: faces.to_vec(),
-                    target_dim: target_dim.clone(),
-                },
+            // Create a fresh dimension variable for the path lambda
+            let fresh_dim = DimVar(0); // Using 0 as fresh dim var
+
+            // Build environment for the dimension closure
+            // We need to capture: path_ty (A), base (u), left (a), right (b), and face values
+            let mut closure_env = im::Vector::new();
+
+            // Store A (the path element type) at index 0
+            closure_env.push_back((**path_ty).clone());
+            let ty_idx = 0u32;
+
+            // Store base path (u) at index 1
+            closure_env.push_back(base.clone());
+            let base_idx = 1u32;
+
+            // Store left endpoint (a) at index 2
+            closure_env.push_back((**left).clone());
+            let left_idx = 2u32;
+
+            // Store right endpoint (b) at index 3
+            closure_env.push_back((**right).clone());
+            let right_idx = 3u32;
+
+            // Store each face value
+            let mut face_indices = Vec::new();
+            for (_, face_val) in faces.iter() {
+                face_indices.push(closure_env.len() as u32);
+                closure_env.push_back(face_val.clone());
+            }
+
+            // Build the path lambda body: hcomp A (u @ i) [(i=0 -> a), (i=1 -> b), (φ -> face @ i)]
+            // In the body, dimension variable i is used
+
+            // A is at ty_idx in env
+            let ty_var = Expr::Var(SyntaxName("A".to_string()), ty_idx);
+
+            // u @ i - apply the base path to dimension i
+            let base_at_i = Expr::PathApp {
+                path: Box::new(Expr::Var(SyntaxName("u".to_string()), base_idx)),
+                dim: Dim::Var(fresh_dim),
+            };
+
+            // Build face system: [(i=0 -> left), (i=1 -> right), (φ -> face @ i)]
+            let mut hcomp_faces = vec![
+                // i=0 -> left endpoint
+                (Face::Eq(fresh_dim, false), Expr::Var(SyntaxName("left".to_string()), left_idx)),
+                // i=1 -> right endpoint
+                (Face::Eq(fresh_dim, true), Expr::Var(SyntaxName("right".to_string()), right_idx)),
+            ];
+
+            // Add original faces, each applied at dimension i
+            for (idx, (face, _)) in faces.iter().enumerate() {
+                let face_at_i = Expr::PathApp {
+                    path: Box::new(Expr::Var(
+                        SyntaxName(format!("face{}", idx)),
+                        face_indices[idx],
+                    )),
+                    dim: Dim::Var(fresh_dim),
+                };
+                hcomp_faces.push((face.clone(), face_at_i));
+            }
+
+            // Build: hcomp A (u @ i) faces
+            let body = Expr::HComp {
+                ty: Box::new(ty_var),
+                base: Box::new(base_at_i),
+                faces: hcomp_faces,
+            };
+
+            // Create the dimension closure
+            let dim_closure = DimClosure::new(closure_env, im::Vector::new(), body);
+
+            Value::VPathLam {
+                dim: fresh_dim,
+                dim_closure,
             }
         }
 

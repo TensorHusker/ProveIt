@@ -181,7 +181,7 @@ pub fn infer(ctx: &Context, expr: &Expr) -> Result<Value> {
         Expr::Coe { ty_fam, from, to, base } => {
             // Type family should be a function from dimension to types
             // For now, simplified: just check it's a lambda returning a type
-            let ty_fam_ty = infer(ctx, ty_fam)?;
+            let _ty_fam_ty = infer(ctx, ty_fam)?;
 
             // Evaluate type family at 'from' dimension
             let ty_fam_val = eval(ty_fam, ctx.env());
@@ -200,7 +200,7 @@ pub fn infer(ctx: &Context, expr: &Expr) -> Result<Value> {
             let ty_ty = infer(ctx, ty)?;
             expect_type(&ty_ty)?;
 
-            let ty_val = eval(ty, ctx.env());
+            let ty_val = crate::eval::eval(ty, ctx.env());
             check(ctx, base, &ty_val)?;
 
             for (face, face_expr) in faces {
@@ -209,6 +209,64 @@ pub fn infer(ctx: &Context, expr: &Expr) -> Result<Value> {
             }
 
             Ok(ty_val)
+        }
+
+        Expr::Glue { base, equivalences } => {
+            // Glue [φ ↦ (T, e)] A : Type_i if A : Type_i and each T : Type_i
+            // and e : Equiv T A when φ holds
+            let base_ty = infer(ctx, base)?;
+            let level = expect_type(&base_ty)?;
+
+            let base_val = crate::eval::eval(base, ctx.env());
+
+            for (face, ty_expr, equiv_expr) in equivalences {
+                validate_face(face)?;
+
+                // Check fiber type T : Type_i
+                let ty_ty = infer(ctx, ty_expr)?;
+                let ty_level = expect_type(&ty_ty)?;
+                if ty_level > level {
+                    return Err(Error::TypeMismatch {
+                        expected: format!("Type{}", level),
+                        got: format!("Type{}", ty_level),
+                    });
+                }
+
+                // Check equiv_expr is an equivalence T → A (simplified check)
+                let _equiv_ty = infer(ctx, equiv_expr)?;
+                // Full check would verify this is Equiv T A
+                let _ = (&base_val, equiv_expr); // Silence unused warning
+            }
+
+            Ok(Value::VType(level))
+        }
+
+        Expr::GlueTm { base, fibers } => {
+            // glue [φ ↦ t] a requires inferring the Glue type from context
+            // For now, simplified: infer base type and assume fibers match
+            let base_ty = infer(ctx, base)?;
+
+            for (face, fiber_expr) in fibers {
+                validate_face(face)?;
+                // Would check fiber against expected fiber type
+                let _fiber_ty = infer(ctx, fiber_expr)?;
+            }
+
+            // Return the base type (simplified - full impl returns Glue type)
+            Ok(base_ty)
+        }
+
+        Expr::Unglue { glue } => {
+            // unglue g : A if g : Glue [φ ↦ (T, e)] A
+            let glue_ty = infer(ctx, glue)?;
+
+            match &glue_ty {
+                Value::VGlue { base, .. } => Ok((**base).clone()),
+                _ => {
+                    // If not a Glue type, might be neutral - return as-is
+                    Ok(glue_ty)
+                }
+            }
         }
 
         _ => Err(Error::CannotInfer(format!("{}", expr))),

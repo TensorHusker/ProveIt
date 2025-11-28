@@ -141,11 +141,89 @@ pub fn eval_with_dims(expr: &Expr, env: &Env, dim_env: &DimEnv) -> Value {
 
         Expr::Glue {
             base,
-            equivalences: _,
+            equivalences,
         } => {
-            // Simplified glue
-            
-            eval_with_dims(base, env, dim_env)
+            // Evaluate Glue type: Glue [φ ↦ (T, e)] A
+            let base_val = eval_with_dims(base, env, dim_env);
+
+            // Evaluate each equivalence in the system
+            let system: Vec<(crate::syntax::Face, std::sync::Arc<Value>, std::sync::Arc<Value>)> = equivalences
+                .iter()
+                .map(|(face, ty_expr, equiv_expr)| {
+                    let resolved_face = resolve_face(face, dim_env);
+                    let ty_val = std::sync::Arc::new(eval_with_dims(ty_expr, env, dim_env));
+                    let equiv_val = std::sync::Arc::new(eval_with_dims(equiv_expr, env, dim_env));
+                    (resolved_face, ty_val, equiv_val)
+                })
+                .collect();
+
+            // If face is true (satisfied), Glue type reduces to the fiber type T
+            for (face, ty_val, _equiv) in &system {
+                if matches!(face, crate::syntax::Face::True) {
+                    return (**ty_val).clone();
+                }
+            }
+
+            Value::VGlue {
+                base: std::sync::Arc::new(base_val),
+                system,
+            }
+        }
+
+        Expr::GlueTm { base, fibers } => {
+            // Evaluate glue term: glue [φ ↦ t] a
+            let base_val = eval_with_dims(base, env, dim_env);
+
+            // Evaluate fiber values
+            let fibers_val: Vec<(crate::syntax::Face, std::sync::Arc<Value>)> = fibers
+                .iter()
+                .map(|(face, fiber_expr)| {
+                    let resolved_face = resolve_face(face, dim_env);
+                    let fiber_val = std::sync::Arc::new(eval_with_dims(fiber_expr, env, dim_env));
+                    (resolved_face, fiber_val)
+                })
+                .collect();
+
+            // If any face is true, return the fiber value
+            for (face, fiber_val) in &fibers_val {
+                if matches!(face, crate::syntax::Face::True) {
+                    return (**fiber_val).clone();
+                }
+            }
+
+            // For now, return base (simplified - full impl would track Glue type)
+            Value::VGlueTm {
+                base: std::sync::Arc::new(base_val),
+                fibers: fibers_val,
+                ty: std::sync::Arc::new(Value::VType(0)), // Placeholder, would be inferred
+            }
+        }
+
+        Expr::Unglue { glue } => {
+            // Evaluate unglue: extracts base value from glued value
+            let glue_val = eval_with_dims(glue, env, dim_env);
+
+            match &glue_val {
+                // If we have a glue term, return its base
+                Value::VGlueTm { base, .. } => (**base).clone(),
+
+                // If glue is neutral, create neutral unglue
+                Value::VNeutral { ty, neutral } => {
+                    Value::VNeutral {
+                        ty: match ty.as_ref() {
+                            Value::VGlue { base, .. } => base.clone(),
+                            _ => ty.clone(),
+                        },
+                        neutral: crate::value::Neutral::NUnglue {
+                            glue_val: Box::new(neutral.clone()),
+                            glue_ty: ty.clone(),
+                        },
+                    }
+                }
+
+                // For other values, return as-is (shouldn't happen with well-typed terms)
+                _ => glue_val,
+            }
         }
 
         Expr::Diff { order: _, dim: _, expr } => {

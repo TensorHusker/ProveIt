@@ -219,6 +219,46 @@ pub fn comp(ty: &Value, base: &Value, faces: &[(Face, Value)], target_dim: Dim) 
             base.clone()
         }
 
+        // Composition in Glue types (CCHM Section 9.6)
+        // comp (Glue [φ ↦ (T, e)] A) u sys =
+        //   glue [φ ↦ comp T (e⁻¹ u) [ψ ↦ e⁻¹ sys]]
+        //        (comp A (unglue u) [ψ ↦ unglue sys, φ ↦ e (comp T ...)])
+        Value::VGlue { base: base_ty, system } => {
+            // For now, simplified implementation:
+            // - If no faces in the system are satisfied, compose in base type
+            // - Otherwise, need full Glue composition
+
+            // Check if any glue face is satisfied at target
+            let target_dims = dim_to_env(&target_dim);
+            for (face, fiber_ty, _equiv) in system {
+                if face_satisfied(face, &target_dims) {
+                    // Face is satisfied: compose in fiber type
+                    // First extract fiber from base (would apply e⁻¹)
+                    // For now, return comp in fiber type with same faces
+                    return comp(fiber_ty, base, faces, target_dim.clone());
+                }
+            }
+
+            // No glue face satisfied: compose in base type
+            // Need to unglue the base and faces first
+            let unglued_base = unglue_value(base);
+            let unglued_faces: Vec<(Face, Value)> = faces
+                .iter()
+                .map(|(f, v)| (f.clone(), unglue_value(v)))
+                .collect();
+
+            // Compose in base type
+            let base_result = comp(base_ty, &unglued_base, &unglued_faces, target_dim.clone());
+
+            // Re-glue the result (would need to apply equivalence)
+            // For now, return as VGlueTm
+            Value::VGlueTm {
+                base: Arc::new(base_result),
+                fibers: vec![], // Would compute fiber values via equivalence
+                ty: Arc::new(ty.clone()),
+            }
+        }
+
         // For other types, return neutral composition
         _ => {
             Value::VNeutral {
@@ -315,6 +355,29 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
             }
         }
 
+        // Coercion in Glue types (CCHM Section 9.5)
+        // coe (λi. Glue [φ(i) ↦ (T(i), e(i))] A(i)) r r' u
+        Value::VGlue { base: base_ty, system } => {
+            // Simplified: if no faces active, coerce in base type
+            // Full implementation would track face changes across dimension
+
+            // Coerce the base value
+            let unglued = unglue_value(base);
+            let coerced_base = coe(base_ty, from.clone(), to.clone(), &unglued);
+
+            // Re-glue with coerced fibers (would need to coerce each fiber)
+            Value::VGlueTm {
+                base: Arc::new(coerced_base),
+                fibers: system.iter().map(|(face, fiber_ty, _equiv)| {
+                    // Would coerce fiber and apply equivalence
+                    let fiber = unglue_value(base); // Simplified
+                    let coerced_fiber = coe(fiber_ty, from.clone(), to.clone(), &fiber);
+                    (face.clone(), Arc::new(coerced_fiber))
+                }).collect(),
+                ty: Arc::new(ty_family.clone()),
+            }
+        }
+
         // For other types, return neutral coercion
         _ => {
             Value::VNeutral {
@@ -327,6 +390,26 @@ pub fn coe(ty_family: &Value, from: Dim, to: Dim, base: &Value) -> Value {
                 },
             }
         }
+    }
+}
+
+/// Helper function to unglue a value (extract base from glued value)
+fn unglue_value(val: &Value) -> Value {
+    match val {
+        Value::VGlueTm { base, .. } => (**base).clone(),
+        Value::VNeutral { ty, neutral } => {
+            Value::VNeutral {
+                ty: match ty.as_ref() {
+                    Value::VGlue { base, .. } => base.clone(),
+                    _ => ty.clone(),
+                },
+                neutral: Neutral::NUnglue {
+                    glue_val: Box::new(neutral.clone()),
+                    glue_ty: ty.clone(),
+                },
+            }
+        }
+        _ => val.clone(),
     }
 }
 

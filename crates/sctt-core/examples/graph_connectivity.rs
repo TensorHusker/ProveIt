@@ -240,6 +240,11 @@ impl EncodingMetrics {
                         .map(|(_, t, e)| Self::expr_size(t) + Self::expr_size(e))
                         .sum::<usize>()
             }
+            Expr::GlueTm { base, fibers } => {
+                1 + Self::expr_size(base)
+                    + fibers.iter().map(|(_, e)| Self::expr_size(e)).sum::<usize>()
+            }
+            Expr::Unglue { glue } => 1 + Self::expr_size(glue),
             Expr::Diff { expr, .. } => 1 + Self::expr_size(expr),
             Expr::Integral { expr, .. } => 1 + Self::expr_size(expr),
             Expr::Taylor { expr, point, .. } => 1 + Self::expr_size(expr) + Self::expr_size(point),

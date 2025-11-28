@@ -123,10 +123,24 @@ pub enum Expr {
         faces: Vec<(Face, Expr)>,
     },
 
-    /// Glue types for univalence
+    /// Glue type former for univalence: Glue [φ ↦ (T, e)] A
+    /// When φ holds, A is equivalent to T via e
     Glue {
-        base: Box<Expr>,
-        equivalences: Vec<(Face, Expr, Expr)>, // (face, type, equiv)
+        base: Box<Expr>,                        // A: the base type
+        equivalences: Vec<(Face, Expr, Expr)>,  // [(φ, T, e)] where e : Equiv T A
+    },
+
+    /// Glue term constructor: glue [φ ↦ t] a
+    /// Constructs a Glue value from a base value and fiber values
+    GlueTm {
+        base: Box<Expr>,                        // a : A (the base value)
+        fibers: Vec<(Face, Expr)>,              // [(φ, t)] where t : T when φ holds
+    },
+
+    /// Unglue eliminator: unglue g
+    /// Extracts the base value from a Glue value
+    Unglue {
+        glue: Box<Expr>,                        // g : Glue [φ ↦ (T, e)] A
     },
 
     /// Differential operator: d/di (smooth_path)

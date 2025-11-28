@@ -44,6 +44,21 @@ pub enum Value {
 
     /// Neutral values (stuck computations)
     VNeutral { ty: Arc<Value>, neutral: Neutral },
+
+    /// Glue type: Glue [φ ↦ (T, e)] A
+    /// When face φ holds, A is equivalent to T via equivalence e
+    VGlue {
+        base: Arc<Value>,                              // A: the base type
+        system: Vec<(Face, Arc<Value>, Arc<Value>)>,   // [(φ, T, e)] face system
+    },
+
+    /// Glued value: glue [φ ↦ t] a
+    /// A value in a Glue type with both base and fiber components
+    VGlueTm {
+        base: Arc<Value>,                              // a : A (base value)
+        fibers: Vec<(Face, Arc<Value>)>,               // [(φ, t)] fiber values
+        ty: Arc<Value>,                                // The Glue type this belongs to
+    },
 }
 
 /// Closures capture environment for lazy evaluation
@@ -130,6 +145,12 @@ pub enum Neutral {
         from: Dim,
         to: Dim,
         base: Arc<Value>,
+    },
+
+    /// Neutral unglue: unglue n where n is neutral
+    NUnglue {
+        glue_val: Box<Neutral>,
+        glue_ty: Arc<Value>,
     },
 }
 

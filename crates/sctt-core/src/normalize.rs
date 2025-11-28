@@ -92,6 +92,38 @@ fn normalize_at_level(val: &Value, level: u32) -> Expr {
         }
 
         Value::VNeutral { neutral, .. } => normalize_neutral(neutral, level),
+
+        Value::VGlue { base, system } => {
+            let base_expr = normalize_at_level(base, level);
+            let system_expr: Vec<(crate::syntax::Face, Expr, Expr)> = system
+                .iter()
+                .map(|(face, ty, equiv)| {
+                    (
+                        face.clone(),
+                        normalize_at_level(ty, level),
+                        normalize_at_level(equiv, level),
+                    )
+                })
+                .collect();
+
+            Expr::Glue {
+                base: Box::new(base_expr),
+                equivalences: system_expr,
+            }
+        }
+
+        Value::VGlueTm { base, fibers, .. } => {
+            let base_expr = normalize_at_level(base, level);
+            let fibers_expr: Vec<(crate::syntax::Face, Expr)> = fibers
+                .iter()
+                .map(|(face, fiber)| (face.clone(), normalize_at_level(fiber, level)))
+                .collect();
+
+            Expr::GlueTm {
+                base: Box::new(base_expr),
+                fibers: fibers_expr,
+            }
+        }
     }
 }
 
@@ -167,6 +199,14 @@ fn normalize_neutral(neutral: &Neutral, level: u32) -> Expr {
                 from: from.clone(),
                 to: to.clone(),
                 base: Box::new(base_expr),
+            }
+        }
+
+        Neutral::NUnglue { glue_val, .. } => {
+            let glue_expr = normalize_neutral(glue_val, level);
+
+            Expr::Unglue {
+                glue: Box::new(glue_expr),
             }
         }
     }

@@ -1,0 +1,988 @@
+% ProveIt Technical Manual
+% Compiled with XeLaTeX for advanced typography and Unicode support
+%
+% Build: xelatex proveit-manual.tex && xelatex proveit-manual.tex
+% (Run twice for cross-references and index)
+
+\documentclass[11pt,a4paper,twoside]{report}
+
+%===============================================================================
+% XETEX-SPECIFIC PACKAGES
+%===============================================================================
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
+
+% Typography - Use system fonts with OpenType features
+\setmainfont{Latin Modern Roman}[
+    Ligatures=TeX,
+    Numbers=OldStyle
+]
+\setsansfont{Latin Modern Sans}[
+    Ligatures=TeX
+]
+\setmonofont{Latin Modern Mono}[
+    Scale=0.9
+]
+\setmathfont{Latin Modern Math}
+
+%===============================================================================
+% ESSENTIAL PACKAGES
+%===============================================================================
+\usepackage{geometry}
+\geometry{
+    paper=a4paper,
+    inner=25mm,
+    outer=20mm,
+    top=25mm,
+    bottom=25mm,
+    bindingoffset=10mm
+}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{makeidx}
+\usepackage{imakeidx}
+
+%===============================================================================
+% CODE LISTINGS
+%===============================================================================
+\usepackage{listings}
+\usepackage{lstfiracode}
+
+\definecolor{codebg}{HTML}{F8F8F8}
+\definecolor{codeframe}{HTML}{E0E0E0}
+\definecolor{keyword}{HTML}{0000FF}
+\definecolor{comment}{HTML}{008000}
+\definecolor{string}{HTML}{A31515}
+\definecolor{identifier}{HTML}{001080}
+
+\lstdefinelanguage{Rust}{
+    keywords={as, break, const, continue, crate, else, enum, extern, false, fn, for, if, impl, in, let, loop, match, mod, move, mut, pub, ref, return, self, Self, static, struct, super, trait, true, type, unsafe, use, where, while, async, await, dyn, abstract, become, box, do, final, macro, override, priv, typeof, unsized, virtual, yield},
+    keywordstyle=\color{keyword}\bfseries,
+    ndkeywords={bool, char, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize, f32, f64, str, String, Vec, Option, Result, Some, None, Ok, Err, Box, Rc, Arc, Cell, RefCell, HashMap, HashSet, BTreeMap, BTreeSet},
+    ndkeywordstyle=\color{identifier}\bfseries,
+    identifierstyle=\color{black},
+    sensitive=true,
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{comment}\itshape,
+    stringstyle=\color{string},
+    morestring=[b]",
+    morestring=[b]',
+}
+
+\lstset{
+    language=Rust,
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    framesep=5pt,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=10pt,
+    xleftmargin=15pt,
+    xrightmargin=5pt,
+    aboveskip=10pt,
+    belowskip=10pt,
+    captionpos=b,
+    escapeinside={(*@}{@*)},
+}
+
+%===============================================================================
+% TIKZ FOR DIAGRAMS
+%===============================================================================
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,
+    shapes.geometric,
+    shapes.symbols,
+    positioning,
+    calc,
+    fit,
+    backgrounds,
+    decorations.pathmorphing,
+    decorations.markings,
+    matrix,
+    chains,
+    scopes,
+    cd  % Commutative diagrams
+}
+
+% Custom TikZ styles for ProveIt diagrams
+\tikzstyle{module} = [
+    rectangle,
+    rounded corners=3pt,
+    draw=blue!50,
+    fill=blue!10,
+    minimum width=2.5cm,
+    minimum height=1cm,
+    text centered,
+    font=\sffamily\small
+]
+
+\tikzstyle{trait} = [
+    rectangle,
+    draw=green!50!black,
+    fill=green!10,
+    minimum width=2cm,
+    minimum height=0.8cm,
+    text centered,
+    font=\sffamily\small\itshape
+]
+
+\tikzstyle{proofnode} = [
+    circle,
+    draw=purple!50,
+    fill=purple!10,
+    minimum size=0.8cm,
+    font=\small
+]
+
+\tikzstyle{arrow} = [
+    ->,
+    >=Stealth,
+    thick
+]
+
+%===============================================================================
+% THEOREM ENVIRONMENTS
+%===============================================================================
+\usepackage{amsthm}
+\usepackage{thmtools}
+
+\definecolor{theorembg}{HTML}{F0F7FF}
+\definecolor{theoremframe}{HTML}{4A90D9}
+\definecolor{definitionbg}{HTML}{F0FFF0}
+\definecolor{definitionframe}{HTML}{4AD94A}
+\definecolor{examplebg}{HTML}{FFF8F0}
+\definecolor{exampleframe}{HTML}{D9944A}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{theoremframe},
+    bodyfont=\normalfont,
+    spaceabove=12pt,
+    spacebelow=12pt,
+    mdframed={
+        backgroundcolor=theorembg,
+        linecolor=theoremframe,
+        linewidth=2pt,
+        leftline=true,
+        rightline=false,
+        topline=false,
+        bottomline=false,
+        innerleftmargin=10pt,
+        innerrightmargin=10pt,
+        innertopmargin=10pt,
+        innerbottommargin=10pt
+    }
+]{theoremstyle}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{definitionframe},
+    bodyfont=\normalfont,
+    spaceabove=12pt,
+    spacebelow=12pt,
+    mdframed={
+        backgroundcolor=definitionbg,
+        linecolor=definitionframe,
+        linewidth=2pt,
+        leftline=true,
+        rightline=false,
+        topline=false,
+        bottomline=false,
+        innerleftmargin=10pt,
+        innerrightmargin=10pt,
+        innertopmargin=10pt,
+        innerbottommargin=10pt
+    }
+]{definitionstyle}
+
+\declaretheoremstyle[
+    headfont=\bfseries\sffamily\color{exampleframe},
+    bodyfont=\normalfont,
+    spaceabove=12pt,
+    spacebelow=12pt,
+    mdframed={
+        backgroundcolor=examplebg,
+        linecolor=exampleframe,
+        linewidth=2pt,
+        leftline=true,
+        rightline=false,
+        topline=false,
+        bottomline=false,
+        innerleftmargin=10pt,
+        innerrightmargin=10pt,
+        innertopmargin=10pt,
+        innerbottommargin=10pt
+    }
+]{examplestyle}
+
+\usepackage{mdframed}
+
+\declaretheorem[style=theoremstyle, name=Theorem, numberwithin=chapter]{theorem}
+\declaretheorem[style=theoremstyle, name=Lemma, sibling=theorem]{lemma}
+\declaretheorem[style=theoremstyle, name=Proposition, sibling=theorem]{proposition}
+\declaretheorem[style=theoremstyle, name=Corollary, sibling=theorem]{corollary}
+\declaretheorem[style=definitionstyle, name=Definition, sibling=theorem]{definition}
+\declaretheorem[style=examplestyle, name=Example, sibling=theorem]{example}
+
+%===============================================================================
+% MATHEMATICAL NOTATION
+%===============================================================================
+% Type theory notation
+\newcommand{\Type}{\mathsf{Type}}
+\newcommand{\Prop}{\mathsf{Prop}}
+\newcommand{\Set}{\mathsf{Set}}
+\newcommand{\Unit}{\mathbf{1}}
+\newcommand{\Empty}{\mathbf{0}}
+\newcommand{\Bool}{\mathsf{Bool}}
+\newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Int}{\mathbb{Z}}
+\newcommand{\Real}{\mathbb{R}}
+
+% Dependent types
+\newcommand{\Sigma}[2]{\sum_{#1} #2}
+\newcommand{\Pi}[2]{\prod_{#1} #2}
+\newcommand{\lmark}[1]{\lambda #1.\,}
+\newcommand{\app}[2]{#1 \, #2}
+
+% Identity types
+\newcommand{\Id}[3]{\mathsf{Id}_{#1}(#2, #3)}
+\newcommand{\refl}[1]{\mathsf{refl}_{#1}}
+\newcommand{\transport}[3]{\mathsf{transport}^{#1}_{#2}(#3)}
+\newcommand{\ap}[2]{\mathsf{ap}_{#1}(#2)}
+
+% Homotopy type theory
+\newcommand{\isEquiv}[1]{\mathsf{isEquiv}(#1)}
+\newcommand{\Equiv}[2]{#1 \simeq #2}
+\newcommand{\fib}[2]{\mathsf{fib}_{#1}(#2)}
+\newcommand{\isContr}[1]{\mathsf{isContr}(#1)}
+\newcommand{\isProp}[1]{\mathsf{isProp}(#1)}
+\newcommand{\isSet}[1]{\mathsf{isSet}(#1)}
+\newcommand{\trunc}[2]{\lVert #2 \rVert_{#1}}
+\newcommand{\proptrunc}[1]{\trunc{-1}{#1}}
+
+% Category theory
+\newcommand{\Hom}[3]{\mathsf{Hom}_{#1}(#2, #3)}
+\newcommand{\id}[1]{\mathsf{id}_{#1}}
+\newcommand{\op}[1]{#1^{\mathsf{op}}}
+\newcommand{\Cat}{\mathbf{Cat}}
+\newcommand{\Func}[2]{\mathsf{Func}(#1, #2)}
+\newcommand{\Nat}{\mathsf{Nat}}
+
+% Proof notation
+\newcommand{\proves}{\vdash}
+\newcommand{\entails}{\models}
+\newcommand{\inmark}[2]{#1 : #2}
+\newcommand{\ctx}{\Gamma}
+\newcommand{\subst}[3]{#1[#2 := #3]}
+
+%===============================================================================
+% HEADERS AND FOOTERS
+%===============================================================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\itshape\leftmark}
+\fancyhead[RO]{\small\itshape\rightmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+%===============================================================================
+% HYPERREF CONFIGURATION
+%===============================================================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=green!50!black,
+    urlcolor=purple!70!black,
+    pdftitle={ProveIt Technical Manual},
+    pdfauthor={ProveIt Contributors},
+    pdfsubject={Geometric Formal Verification},
+    pdfkeywords={formal verification, type theory, category theory, homotopy type theory, accessibility}
+}
+
+%===============================================================================
+% INDEX
+%===============================================================================
+\makeindex[columns=2, title=Index, intoc]
+
+%===============================================================================
+% DOCUMENT INFORMATION
+%===============================================================================
+\title{
+    \vspace{-2cm}
+    {\Huge\sffamily\bfseries ProveIt}\\[0.5cm]
+    {\Large\sffamily Technical Manual}\\[1cm]
+    {\large Geometric Construction Environment for\\Accessible Formal Verification}
+}
+\author{
+    \textsc{ProveIt Contributors}\\[0.3cm]
+    \small\url{https://github.com/TensorHusker/ProveIt}
+}
+\date{
+    Version 0.1.0\\[0.2cm]
+    \today
+}
+
+%===============================================================================
+% DOCUMENT BODY
+%===============================================================================
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\listoftables
+\clearpage
+
+%-------------------------------------------------------------------------------
+\chapter{Introduction}
+\label{chap:introduction}
+%-------------------------------------------------------------------------------
+
+\section{Vision}
+\index{vision}
+
+ProveIt\index{ProveIt} reimagines formal verification through the lens of \emph{geometric construction}. Instead of wrestling with abstract syntax trees and type annotations, users build proofs by constructing geometric objects that embody logical relationships.
+
+\begin{definition}[Geometric Proof Construction]
+\label{def:geometric-proof}
+A \emph{geometric proof construction} is a sequence of geometric operations $(g_1, g_2, \ldots, g_n)$ where each operation $g_i$ corresponds to a valid inference rule in the underlying formal system, and the spatial relationships between constructed objects encode logical dependencies.
+\end{definition}
+
+\subsection{Core Principles}
+
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=10pt]
+    \item \textbf{Accessibility-First Design}\index{accessibility}
+
+    All features must be accessible to blind, neurodivergent, and post-injury users. This is not an afterthought but a foundational design constraint.
+
+    \item \textbf{Multiple Formal Methods}\index{formal methods}
+
+    Support for type theory\index{type theory}, category theory\index{category theory}, and homotopy type theory\index{homotopy type theory}, with seamless translation between formalisms.
+
+    \item \textbf{Real-Time Verification}\index{verification!real-time}
+
+    Proofs are validated as they are constructed, providing immediate feedback on validity.
+
+    \item \textbf{Spatial Reasoning}\index{spatial reasoning}
+
+    Geometric constructions serve as the primary interaction paradigm, leveraging human spatial intuition.
+\end{enumerate}
+
+%-------------------------------------------------------------------------------
+\chapter{Mathematical Foundations}
+\label{chap:foundations}
+%-------------------------------------------------------------------------------
+
+\section{Type Theory}
+\index{type theory}
+
+ProveIt's foundation rests on dependent type theory\index{type theory!dependent}, which provides a unified framework for logic and computation.
+
+\begin{definition}[Dependent Function Type]
+\label{def:pi-type}
+Given a type $A : \Type$ and a family $B : A \to \Type$, the \emph{dependent function type} (or $\Pi$-type) is:
+\[
+    \Pi_{x : A} B(x) \quad \text{or equivalently} \quad (x : A) \to B(x)
+\]
+Elements of this type are functions $f$ such that for any $a : A$, we have $f(a) : B(a)$.
+\end{definition}
+
+\begin{definition}[Dependent Pair Type]
+\label{def:sigma-type}
+Given a type $A : \Type$ and a family $B : A \to \Type$, the \emph{dependent pair type} (or $\Sigma$-type) is:
+\[
+    \Sigma_{x : A} B(x) \quad \text{or equivalently} \quad (x : A) \times B(x)
+\]
+Elements are pairs $(a, b)$ where $a : A$ and $b : B(a)$.
+\end{definition}
+
+\subsection{Type Judgments}
+\index{type theory!judgments}
+
+The fundamental judgments in our type system are:
+
+\begin{table}[htbp]
+\centering
+\caption{Type-theoretic judgments in ProveIt}
+\label{tab:judgments}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Judgment} & \textbf{Reading} & \textbf{Meaning} \\
+\midrule
+$\ctx \proves A : \Type$ & ``$A$ is a type in context $\ctx$'' & Type formation \\
+$\ctx \proves a : A$ & ``$a$ has type $A$ in context $\ctx$'' & Term introduction \\
+$\ctx \proves a \equiv b : A$ & ``$a$ equals $b$ at type $A$'' & Definitional equality \\
+$\ctx \proves \Id{A}{a}{b}$ & ``$a$ is propositionally equal to $b$'' & Identity type \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Inference Rules as Geometric Operations}
+\index{inference rules}
+
+Each inference rule corresponds to a geometric construction:
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=1.5cm]
+    % Function application
+    \node[proofnode] (f) {$f$};
+    \node[proofnode, right=of f] (a) {$a$};
+    \node[proofnode, below=of $(f)!0.5!(a)$] (fa) {$f(a)$};
+
+    \draw[arrow] (f) -- (fa) node[midway, left, font=\scriptsize] {apply};
+    \draw[arrow] (a) -- (fa);
+
+    % Lambda abstraction
+    \node[proofnode, right=3cm of a] (body) {$e$};
+    \node[proofnode, below=of body] (lam) {$\lambda x.e$};
+    \node[draw=none, above=0.5cm of body, font=\scriptsize] {$[x:A]$};
+
+    \draw[arrow, dashed] (body) -- (lam) node[midway, right, font=\scriptsize] {abstract};
+
+    % Labels
+    \node[below=0.5cm of fa, font=\sffamily\small] {Application};
+    \node[below=0.5cm of lam, font=\sffamily\small] {Abstraction};
+\end{tikzpicture}
+\caption{Geometric representation of $\lambda$-calculus operations}
+\label{fig:lambda-geometry}
+\end{figure}
+
+\section{Homotopy Type Theory}
+\index{homotopy type theory}
+
+ProveIt implements homotopy type theory (HoTT)\index{HoTT|see{homotopy type theory}}, which interprets types as spaces and terms as points.
+
+\begin{theorem}[Univalence Axiom]
+\label{thm:univalence}
+\index{univalence}
+For types $A, B : \Type$, the canonical map
+\[
+    \mathsf{idtoeqv} : (A = B) \to (A \simeq B)
+\]
+is an equivalence.
+\end{theorem}
+
+The univalence axiom has profound implications for formal verification:
+
+\begin{corollary}
+Equivalent types are interchangeable in all contexts. If $\Equiv{A}{B}$ and $P : \Type \to \Type$, then $P(A) \simeq P(B)$.
+\end{corollary}
+
+\subsection{Higher Inductive Types}
+\index{higher inductive types}
+
+ProveIt supports higher inductive types (HITs), which allow constructors for paths:
+
+\begin{example}[Circle as HIT]
+\label{ex:circle}
+The circle $S^1$ is defined as:
+\begin{itemize}
+    \item A point constructor: $\mathsf{base} : S^1$
+    \item A path constructor: $\mathsf{loop} : \mathsf{base} = \mathsf{base}$
+\end{itemize}
+\end{example}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+    \draw[thick] (0,0) circle (1.5cm);
+    \fill (1.5,0) circle (3pt) node[right] {$\mathsf{base}$};
+    \draw[->, thick, blue, decorate, decoration={snake, amplitude=1pt, segment length=5pt}]
+        (1.4,0.3) arc (15:345:1.5cm);
+    \node[blue] at (0, 2) {$\mathsf{loop}$};
+\end{tikzpicture}
+\caption{The circle $S^1$ as a higher inductive type}
+\label{fig:circle}
+\end{figure}
+
+\section{Category Theory}
+\index{category theory}
+
+ProveIt's internal language can be interpreted categorically, enabling powerful abstraction.
+
+\begin{definition}[Category]
+\label{def:category}
+A \emph{category} $\mathcal{C}$ consists of:
+\begin{itemize}
+    \item A collection of \emph{objects} $\mathsf{Ob}(\mathcal{C})$
+    \item For each pair of objects $A, B$, a set $\Hom{\mathcal{C}}{A}{B}$ of \emph{morphisms}
+    \item Identity morphisms $\id{A} : \Hom{\mathcal{C}}{A}{A}$
+    \item Composition $\circ : \Hom{\mathcal{C}}{B}{C} \times \Hom{\mathcal{C}}{A}{B} \to \Hom{\mathcal{C}}{A}{C}$
+\end{itemize}
+satisfying associativity and identity laws.
+\end{definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzcd}[row sep=large, column sep=large]
+    A \arrow[r, "f"] \arrow[dr, "g \circ f"'] & B \arrow[d, "g"] \\
+    & C
+\end{tikzcd}
+\caption{Composition of morphisms in a category}
+\label{fig:composition}
+\end{figure}
+
+%-------------------------------------------------------------------------------
+\chapter{Architecture}
+\label{chap:architecture}
+%-------------------------------------------------------------------------------
+
+\section{Module Organization}
+\index{architecture}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=1.2cm and 2cm]
+    % Core modules
+    \node[module] (lib) {lib.rs};
+
+    \node[module, below left=of lib] (proof) {proof/};
+    \node[module, below=of lib] (geometry) {geometry/};
+    \node[module, below right=of lib] (formal) {formal\_methods/};
+
+    \node[module, below=of proof] (access) {accessibility/};
+    \node[module, below=of geometry] (verify) {verification/};
+
+    % Traits
+    \node[trait, right=2.5cm of formal] (verifiable) {Verifiable};
+    \node[trait, below=0.8cm of verifiable] (construct) {Constructible};
+    \node[trait, below=0.8cm of construct] (accessible) {Accessible};
+
+    % Connections
+    \draw[arrow] (lib) -- (proof);
+    \draw[arrow] (lib) -- (geometry);
+    \draw[arrow] (lib) -- (formal);
+    \draw[arrow] (proof) -- (access);
+    \draw[arrow] (geometry) -- (verify);
+    \draw[arrow] (proof) -- (verify);
+
+    \draw[arrow, dashed, blue!60] (formal) -- (verifiable);
+    \draw[arrow, dashed, blue!60] (geometry) -- (construct);
+    \draw[arrow, dashed, blue!60] (access) -- (accessible);
+
+    % Legend
+    \node[below=3cm of verify, font=\sffamily\small] {
+        \tikz{\node[module, minimum width=1cm, minimum height=0.5cm] {};} Module \quad
+        \tikz{\node[trait, minimum width=1cm, minimum height=0.5cm] {};} Trait
+    };
+\end{tikzpicture}
+\caption{ProveIt module architecture}
+\label{fig:architecture}
+\end{figure}
+
+\section{Core Traits}
+\index{traits}
+
+\begin{lstlisting}[caption={Core trait definitions}, label=lst:traits]
+/// A type that can be formally verified
+pub trait Verifiable {
+    /// The type of proof witness
+    type Witness;
+
+    /// Verify the construction, returning a witness on success
+    fn verify(&self) -> Result<Self::Witness, VerificationError>;
+
+    /// Check if verification is currently valid
+    fn is_valid(&self) -> bool;
+}
+
+/// A type that can be geometrically constructed
+pub trait Constructible: Verifiable {
+    /// The type of construction steps
+    type Step;
+
+    /// Apply a construction step
+    fn apply_step(&mut self, step: Self::Step) -> Result<(), ConstructionError>;
+
+    /// Get the construction history
+    fn history(&self) -> &[Self::Step];
+}
+
+/// A type with accessibility metadata
+pub trait Accessible {
+    /// Get a screen-reader friendly description
+    fn describe(&self) -> AccessibleDescription;
+
+    /// Get audio cue for this element
+    fn audio_cue(&self) -> Option<AudioCue>;
+
+    /// Get haptic pattern for this element
+    fn haptic_pattern(&self) -> Option<HapticPattern>;
+}
+\end{lstlisting}
+
+\section{Design Patterns}
+\index{design patterns}
+
+\subsection{Builder Pattern for Proofs}
+\index{design patterns!builder}
+
+\begin{lstlisting}[caption={Proof builder pattern}, label=lst:builder]
+pub struct ProofBuilder<S: ProofState> {
+    context: Context,
+    steps: Vec<ProofStep>,
+    state: PhantomData<S>,
+}
+
+// Type states for proof construction
+pub struct Unstarted;
+pub struct InProgress;
+pub struct Complete;
+
+impl ProofBuilder<Unstarted> {
+    pub fn new() -> Self { /* ... */ }
+
+    pub fn assume(self, prop: Proposition) -> ProofBuilder<InProgress> {
+        /* ... */
+    }
+}
+
+impl ProofBuilder<InProgress> {
+    pub fn apply_rule(self, rule: InferenceRule) -> Self { /* ... */ }
+
+    pub fn finish(self) -> Result<ProofBuilder<Complete>, ProofError> {
+        /* ... */
+    }
+}
+
+impl ProofBuilder<Complete> {
+    pub fn extract(self) -> Proof { /* ... */ }
+}
+\end{lstlisting}
+
+%-------------------------------------------------------------------------------
+\chapter{Accessibility}
+\label{chap:accessibility}
+%-------------------------------------------------------------------------------
+
+\section{Design Philosophy}
+\index{accessibility!design}
+
+ProveIt's accessibility is not an add-on but a core architectural concern. Every feature is designed with multiple modalities in mind.
+
+\begin{table}[htbp]
+\centering
+\caption{Accessibility modalities in ProveIt}
+\label{tab:modalities}
+\begin{tabular}{@{}p{3cm}p{4cm}p{5cm}@{}}
+\toprule
+\textbf{Modality} & \textbf{Use Case} & \textbf{Implementation} \\
+\midrule
+Visual & Default interaction & Standard GUI with high contrast options \\
+Auditory & Screen reader users & ARIA labels, audio cues for operations \\
+Haptic & Enhanced spatial awareness & Vibration patterns for geometric relationships \\
+Keyboard & Motor accessibility & Full keyboard navigation, customizable shortcuts \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{WCAG Compliance}
+\index{accessibility!WCAG}
+\index{WCAG}
+
+ProveIt targets WCAG 2.1 Level AAA compliance:
+
+\begin{itemize}[itemsep=5pt]
+    \item \textbf{Perceivable}: All information is presentable in multiple modalities
+    \item \textbf{Operable}: All functionality is keyboard accessible
+    \item \textbf{Understandable}: Clear, consistent interface with predictable behavior
+    \item \textbf{Robust}: Compatible with assistive technologies
+\end{itemize}
+
+\subsection{Audio Representation of Proofs}
+\index{accessibility!audio}
+
+Geometric constructions are mapped to audio representations:
+
+\begin{lstlisting}[caption={Audio cue generation}, label=lst:audio]
+impl Accessible for GeometricPrimitive {
+    fn audio_cue(&self) -> Option<AudioCue> {
+        Some(match self {
+            GeometricPrimitive::Point(p) => AudioCue::Tone {
+                frequency: map_to_frequency(p.x),
+                duration: Duration::from_millis(100),
+                pan: map_to_stereo(p.y),
+            },
+            GeometricPrimitive::Line(l) => AudioCue::Sweep {
+                start_freq: map_to_frequency(l.start.x),
+                end_freq: map_to_frequency(l.end.x),
+                duration: Duration::from_millis(300),
+            },
+            GeometricPrimitive::Circle(c) => AudioCue::Pulse {
+                frequency: map_to_frequency(c.center.x),
+                rate: map_to_rate(c.radius),
+                duration: Duration::from_millis(500),
+            },
+        })
+    }
+}
+\end{lstlisting}
+
+%-------------------------------------------------------------------------------
+\chapter{Code Style Guidelines}
+\label{chap:style}
+%-------------------------------------------------------------------------------
+
+\section{Rust Conventions}
+\index{code style}
+
+\subsection{Naming}
+
+\begin{table}[htbp]
+\centering
+\caption{Naming conventions}
+\label{tab:naming}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Item} & \textbf{Convention} & \textbf{Example} \\
+\midrule
+Types & PascalCase & \texttt{ProofStep}, \texttt{GeometricPrimitive} \\
+Traits & PascalCase & \texttt{Verifiable}, \texttt{Constructible} \\
+Functions & snake\_case & \texttt{verify\_construction} \\
+Variables & snake\_case & \texttt{proof\_context} \\
+Constants & SCREAMING\_SNAKE\_CASE & \texttt{MAX\_PROOF\_DEPTH} \\
+Modules & snake\_case & \texttt{geometric\_primitives} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Error Handling}
+\index{error handling}
+
+\begin{lstlisting}[caption={Domain-specific error types}, label=lst:errors]
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum VerificationError {
+    #[error("type mismatch: expected {expected}, found {found}")]
+    TypeMismatch {
+        expected: TypeId,
+        found: TypeId,
+        #[source]
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    },
+
+    #[error("proof step {step} is invalid: {reason}")]
+    InvalidStep {
+        step: usize,
+        reason: String,
+    },
+
+    #[error("construction incomplete: missing {missing:?}")]
+    Incomplete {
+        missing: Vec<String>,
+    },
+}
+\end{lstlisting}
+
+\section{Documentation Standards}
+\index{documentation}
+
+Every public item requires documentation:
+
+\begin{lstlisting}[caption={Documentation example}, label=lst:docs]
+/// A geometric point in 2D space.
+///
+/// Points are the fundamental building blocks of geometric constructions.
+/// They can be created directly or as the result of operations like
+/// line intersections.
+///
+/// # Mathematical Background
+///
+/// In our type-theoretic interpretation, a point corresponds to a
+/// term of type `Point`, which is a dependent pair:
+///
+/// ```text
+/// Point := Σ(x : ℝ)(y : ℝ)
+/// ```
+///
+/// # Accessibility
+///
+/// Points are announced to screen readers with their coordinates
+/// and any semantic labels (e.g., "intersection point A").
+///
+/// # Examples
+///
+/// ```rust
+/// use proveit::geometry::Point;
+///
+/// let origin = Point::new(0.0, 0.0);
+/// let p = Point::new(3.0, 4.0);
+///
+/// assert_eq!(origin.distance_to(&p), 5.0);
+/// ```
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Point {
+    /// The x-coordinate
+    pub x: f64,
+    /// The y-coordinate
+    pub y: f64,
+}
+\end{lstlisting}
+
+%-------------------------------------------------------------------------------
+\chapter{Testing}
+\label{chap:testing}
+%-------------------------------------------------------------------------------
+
+\section{Test Organization}
+\index{testing}
+
+\begin{lstlisting}[caption={Test module structure}, label=lst:tests]
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use proptest::prelude::*;
+
+    #[test]
+    fn test_point_construction() {
+        let p = Point::new(1.0, 2.0);
+        assert_eq!(p.x, 1.0);
+        assert_eq!(p.y, 2.0);
+    }
+
+    // Property-based tests for mathematical invariants
+    proptest! {
+        #[test]
+        fn distance_is_symmetric(
+            x1 in -1000.0..1000.0f64,
+            y1 in -1000.0..1000.0f64,
+            x2 in -1000.0..1000.0f64,
+            y2 in -1000.0..1000.0f64,
+        ) {
+            let p1 = Point::new(x1, y1);
+            let p2 = Point::new(x2, y2);
+
+            let d1 = p1.distance_to(&p2);
+            let d2 = p2.distance_to(&p1);
+
+            prop_assert!((d1 - d2).abs() < 1e-10);
+        }
+
+        #[test]
+        fn triangle_inequality(
+            x1 in -100.0..100.0f64,
+            y1 in -100.0..100.0f64,
+            x2 in -100.0..100.0f64,
+            y2 in -100.0..100.0f64,
+            x3 in -100.0..100.0f64,
+            y3 in -100.0..100.0f64,
+        ) {
+            let a = Point::new(x1, y1);
+            let b = Point::new(x2, y2);
+            let c = Point::new(x3, y3);
+
+            let ab = a.distance_to(&b);
+            let bc = b.distance_to(&c);
+            let ac = a.distance_to(&c);
+
+            prop_assert!(ac <= ab + bc + 1e-10);
+        }
+    }
+}
+\end{lstlisting}
+
+%-------------------------------------------------------------------------------
+\chapter{Appendices}
+\label{chap:appendices}
+%-------------------------------------------------------------------------------
+
+\appendix
+
+\chapter{Symbol Reference}
+\label{app:symbols}
+
+\begin{longtable}{@{}clp{8cm}@{}}
+\caption{Mathematical symbols used in this manual} \\
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Meaning} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+$\Type$ & Type & The universe of types \\
+$\Pi$ & Pi (product) & Dependent function type \\
+$\Sigma$ & Sigma (sum) & Dependent pair type \\
+$\lambda$ & Lambda & Function abstraction \\
+$\equiv$ & Definitional equality & Judgmental/computational equality \\
+$=$ & Propositional equality & Identity type \\
+$\simeq$ & Equivalence & Type equivalence \\
+$\proves$ & Turnstile & Derivability \\
+$\Hom{\mathcal{C}}{A}{B}$ & Hom-set & Morphisms from $A$ to $B$ \\
+$\circ$ & Composition & Morphism composition \\
+\end{longtable}
+
+\chapter{Building from Source}
+\label{app:building}
+
+\section{Prerequisites}
+
+\begin{itemize}
+    \item Rust 1.70 or later
+    \item Cargo package manager
+    \item (Optional) \LaTeX{} distribution for building documentation
+\end{itemize}
+
+\section{Build Commands}
+
+\begin{lstlisting}[language=bash, caption={Build commands}]
+# Clone the repository
+git clone https://github.com/TensorHusker/ProveIt.git
+cd ProveIt
+
+# Build in debug mode
+cargo build
+
+# Build in release mode
+cargo build --release
+
+# Run tests
+cargo test
+
+# Run with logging
+RUST_LOG=debug cargo run
+
+# Build documentation
+cargo doc --open
+
+# Build this manual (requires XeLaTeX)
+cd docs/tex
+xelatex proveit-manual.tex
+xelatex proveit-manual.tex  # Run twice for cross-references
+\end{lstlisting}
+
+%-------------------------------------------------------------------------------
+% INDEX
+%-------------------------------------------------------------------------------
+\printindex
+
+\end{document}

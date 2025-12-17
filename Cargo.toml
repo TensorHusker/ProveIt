@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    # Phase 1: Core Type Theory
+    "crates/ttt-core",
+    # Phase 2: Trust Kernel
+    "crates/ttt-kernel",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/TensorHusker/ProveIt"

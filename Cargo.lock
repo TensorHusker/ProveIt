@@ -270,6 +270,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ttt-tactics"
+version = "0.1.0"
+dependencies = [
+ "proptest",
+ "ttt-core",
+ "ttt-kernel",
+]
+
+[[package]]
 name = "unarray"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

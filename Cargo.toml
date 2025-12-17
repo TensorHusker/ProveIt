@@ -4,6 +4,8 @@ members = [
     "crates/ttt-core",
     # Phase 2: Trust Kernel
     "crates/ttt-kernel",
+    # Phase 3: Proof Tactics
+    "crates/ttt-tactics",
 ]
 resolver = "2"
 

@@ -1,0 +1,342 @@
+/* Root variables for easy theming */
+:root {
+    --primary-color: #0066cc;
+    --primary-hover: #0052a3;
+    --error-color: #d32f2f;
+    --success-color: #388e3c;
+    --text-color: #212121;
+    --bg-color: #ffffff;
+    --border-color: #cccccc;
+    --focus-color: #ff9800;
+    --help-text-color: #666666;
+    --disabled-bg: #f5f5f5;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+/* Reset and base styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    padding: var(--spacing-md);
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Container */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--bg-color);
+}
+
+/* Header */
+header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+header h1 {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--primary-color);
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: var(--help-text-color);
+}
+
+/* Form styles */
+form {
+    background: var(--bg-color);
+    padding: var(--spacing-xl);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Labels */
+label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.required {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: var(--spacing-md);
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover {
+    border-color: var(--primary-color);
+}
+
+/* Focus states - extra prominent for accessibility */
+input:focus,
+button:focus,
+a:focus {
+    outline: 3px solid var(--focus-color);
+    outline-offset: 2px;
+    border-color: var(--primary-color);
+}
+
+/* Invalid state */
+input:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--error-color);
+}
+
+/* Help text */
+.help-text {
+    display: block;
+    margin-top: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--help-text-color);
+}
+
+/* Error messages */
+.error-message {
+    display: block;
+    margin-top: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--error-color);
+    font-weight: 500;
+    min-height: 1.25rem;
+}
+
+/* Fieldset for accessibility preferences */
+fieldset {
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    padding: var(--spacing-md);
+}
+
+legend {
+    font-weight: 600;
+    padding: 0 var(--spacing-sm);
+    font-size: 1rem;
+}
+
+/* Checkbox group */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.checkbox-group:last-child {
+    margin-bottom: 0;
+}
+
+input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: var(--spacing-sm);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkbox-group label {
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+/* Buttons */
+.form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.btn {
+    flex: 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: #b0b0b0;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+/* Form footer */
+.form-footer {
+    margin-top: var(--spacing-lg);
+    text-align: center;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Success message */
+.success-message {
+    background-color: #e8f5e9;
+    border: 2px solid var(--success-color);
+    border-radius: 8px;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.success-message h2 {
+    color: var(--success-color);
+    margin-bottom: var(--spacing-md);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Footer */
+footer {
+    margin-top: var(--spacing-xl);
+    text-align: center;
+    color: var(--help-text-color);
+    font-size: 0.875rem;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000000;
+        --text-color: #000000;
+        --bg-color: #ffffff;
+    }
+    
+    input,
+    button,
+    fieldset {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+    form {
+        padding: var(--spacing-md);
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: #64b5f6;
+        --primary-hover: #42a5f5;
+        --text-color: #e0e0e0;
+        --bg-color: #121212;
+        --border-color: #424242;
+        --help-text-color: #b0b0b0;
+        --disabled-bg: #1e1e1e;
+    }
+    
+    form {
+        background-color: #1e1e1e;
+    }
+    
+    .success-message {
+        background-color: #1b5e20;
+        border-color: var(--success-color);
+        color: #e0e0e0;
+    }
+}

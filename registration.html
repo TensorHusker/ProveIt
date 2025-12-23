@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration - ProveIt</title>
+    <link rel="stylesheet" href="registration.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ProveIt User Registration</h1>
+            <p class="subtitle">Create your account to access our geometric construction environment</p>
+        </header>
+
+        <main>
+            <form id="registrationForm" aria-labelledby="form-title" novalidate>
+                <h2 id="form-title" class="sr-only">Registration Form</h2>
+
+                <div class="form-group">
+                    <label for="username">
+                        Username <span class="required" aria-label="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="username-error username-help"
+                        autocomplete="username"
+                        minlength="3"
+                        maxlength="20"
+                    >
+                    <small id="username-help" class="help-text">3-20 characters, letters and numbers only</small>
+                    <span id="username-error" class="error-message" role="alert" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        Email Address <span class="required" aria-label="required">*</span>
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="email-error email-help"
+                        autocomplete="email"
+                    >
+                    <small id="email-help" class="help-text">We'll use this to verify your account</small>
+                    <span id="email-error" class="error-message" role="alert" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        Password <span class="required" aria-label="required">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="password-error password-help"
+                        autocomplete="new-password"
+                        minlength="8"
+                    >
+                    <small id="password-help" class="help-text">At least 8 characters, include letters and numbers</small>
+                    <span id="password-error" class="error-message" role="alert" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">
+                        Confirm Password <span class="required" aria-label="required">*</span>
+                    </label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        required 
+                        aria-required="true"
+                        aria-describedby="confirmPassword-error"
+                        autocomplete="new-password"
+                    >
+                    <span id="confirmPassword-error" class="error-message" role="alert" aria-live="polite"></span>
+                </div>
+
+                <fieldset class="form-group">
+                    <legend>Accessibility Preferences (Optional)</legend>
+                    
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="highContrast" 
+                            name="highContrast"
+                        >
+                        <label for="highContrast">Enable high contrast mode</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="screenReader" 
+                            name="screenReader"
+                        >
+                        <label for="screenReader">Optimize for screen readers</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="reduceMotion" 
+                            name="reduceMotion"
+                        >
+                        <label for="reduceMotion">Reduce motion and animations</label>
+                    </div>
+                </fieldset>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input 
+                            type="checkbox" 
+                            id="terms" 
+                            name="terms" 
+                            required 
+                            aria-required="true"
+                            aria-describedby="terms-error"
+                        >
+                        <label for="terms">
+                            I agree to the <a href="#" rel="noopener">Terms of Service</a> and <a href="#" rel="noopener">Privacy Policy</a>
+                            <span class="required" aria-label="required">*</span>
+                        </label>
+                    </div>
+                    <span id="terms-error" class="error-message" role="alert" aria-live="polite"></span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Create Account
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        Clear Form
+                    </button>
+                </div>
+
+                <div class="form-footer">
+                    <p>Already have an account? <a href="#">Sign in</a></p>
+                </div>
+            </form>
+
+            <div id="successMessage" class="success-message hidden" role="status" aria-live="polite">
+                <h2>Registration Successful!</h2>
+                <p>Your account has been created. You can now sign in.</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 ProveIt. Designed accessibility-first for all users.</p>
+        </footer>
+    </div>
+
+    <script src="registration.js"></script>
+</body>
+</html>

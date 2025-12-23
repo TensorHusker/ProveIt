@@ -27,6 +27,8 @@ jobs:
   fmt:
     name: Format Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,6 +46,8 @@ jobs:
   clippy:
     name: Clippy Lints
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -67,6 +71,8 @@ jobs:
   build-and-test:
     name: Build & Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       # Continue running other jobs even if one fails
       # This allows us to see all platform-specific issues
@@ -102,6 +108,8 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -126,6 +134,8 @@ jobs:
   wasm:
     name: WASM Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -150,6 +160,7 @@ jobs:
     name: CI Success
     needs: [fmt, clippy, build-and-test, docs, wasm]
     runs-on: ubuntu-latest
+    permissions: {}
     if: always()
     steps:
       - name: Check all jobs succeeded

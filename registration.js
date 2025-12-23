@@ -275,8 +275,13 @@
             timestamp: new Date().toISOString()
         };
 
-        // Log registration data (in a real app, this would be sent to a server)
-        console.log('Registration data:', formData);
+        // Log registration data for debugging (password excluded for security)
+        console.log('Registration submitted:', {
+            username: formData.username,
+            email: formData.email,
+            accessibility: formData.accessibility,
+            timestamp: formData.timestamp
+        });
 
         // Hide form and show success message
         form.classList.add('hidden');
@@ -317,7 +322,8 @@
         confirmPasswordInput.removeAttribute('aria-invalid');
         termsCheckbox.removeAttribute('aria-invalid');
 
-        // Focus on first field
+        // Focus on first field after reset completes
+        // setTimeout ensures focus happens after the form reset event has fully completed
         setTimeout(function() {
             usernameInput.focus();
         }, 0);

@@ -154,13 +154,10 @@ jobs:
     steps:
       - name: Check all jobs succeeded
         if: |
-          needs.fmt.result != 'success' ||
-          needs.clippy.result != 'success' ||
-          needs.build-and-test.result != 'success' ||
-          needs.docs.result != 'success' ||
-          needs.wasm.result != 'success'
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled')
         run: |
-          echo "One or more CI jobs failed"
+          echo "One or more CI jobs failed or were cancelled"
           exit 1
       
       - name: CI passed

@@ -1,0 +1,14 @@
+[package]
+name = "ttt-tactics"
+version = "0.1.0"
+edition = "2021"
+description = "Proof automation tactics for Tiny Type Theory"
+license = "MIT OR Apache-2.0"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+
+[dependencies]
+ttt-core = { path = "../ttt-core" }
+ttt-kernel = { path = "../ttt-kernel" }
+
+[dev-dependencies]
+proptest = "1.4"

@@ -1,0 +1,5 @@
+reviews:
+  auto_review: true
+  review_style: concise
+instructions:
+  - "Focus on Rust idioms and performance. Skip proof logic."

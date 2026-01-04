@@ -1,0 +1,12 @@
+[package]
+name = "ttt-core"
+version = "0.1.0"
+edition = "2021"
+description = "Core term representation and normalization for Tiny Type Theory"
+license = "MIT OR Apache-2.0"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+
+[dependencies]
+
+[dev-dependencies]
+proptest = "1.4"

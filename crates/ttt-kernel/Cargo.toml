@@ -1,0 +1,14 @@
+[package]
+name = "ttt-kernel"
+version = "0.1.0"
+edition = "2021"
+description = "Trust kernel for Tiny Type Theory - the minimal type checker"
+license = "MIT OR Apache-2.0"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+
+[dependencies]
+ttt-core = { path = "../ttt-core" }
+hex = "0.4"
+
+[dev-dependencies]
+proptest = "1.4"

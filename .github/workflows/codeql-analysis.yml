@@ -1,0 +1,38 @@
+name: "CodeQL Security Analysis"
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        # CodeQL will auto-detect languages in the repository
+        # Supported: c-cpp, csharp, go, java-kotlin, javascript-typescript, python, ruby, swift
+        # Add custom queries for additional security coverage
+        queries: security-extended,security-and-quality
+
+    # Autobuild attempts to build any compiled languages
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3

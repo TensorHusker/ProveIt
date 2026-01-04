@@ -19,21 +19,24 @@ jobs:
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check for Cargo.lock existence
-        id: cargo-lock
+      - name: Check for Cargo.toml existence
+        id: cargo-check
         run: |
-          if [ -f "Cargo.lock" ] || [ -f "Cargo.toml" ]; then
+          if [ -f "Cargo.toml" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run cargo-audit
-        if: steps.cargo-lock.outputs.exists == 'true'
+        if: steps.cargo-check.outputs.exists == 'true'
         uses: rustsec/audit-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,29 @@
+[package]
+name = "accessibility"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+license = "MIT"
+description = "Accessibility features for ProveIt - audio, haptics, and natural language"
+
+[dependencies]
+sctt-core = { path = "../sctt-core" }
+geometry = { path = "../geometry" }
+proof-engine = { path = "../proof-engine" }
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Audio synthesis
+rodio = "0.19"
+cpal = "0.15"
+
+# Logging
+tracing = "0.1"
+
+[dev-dependencies]

@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "crates/sctt-core",
+    "crates/proof-engine",
+    "crates/geometry",
+    "crates/accessibility",
+    "crates/butterfly-core",
+    "crates/butterfly-coordinator",
+    "crates/butterfly-worker",
+    "crates/cli",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+authors = ["Alaina Scott <tensorhusker@users.noreply.github.com>"]
+license = "MIT"

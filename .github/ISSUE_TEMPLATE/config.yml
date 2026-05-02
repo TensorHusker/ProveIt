@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or Discussion
+    url: https://github.com/TensorHusker/ProveIt/discussions
+    about: For questions, design discussions, or general topics, please use Discussions
+  - name: Security Vulnerability
+    url: https://github.com/TensorHusker/ProveIt/security/advisories/new
+    about: For security vulnerabilities, please use private vulnerability reporting (see SECURITY.md)
+  - name: Documentation
+    url: https://github.com/TensorHusker/ProveIt/tree/main/docs
+    about: Browse documentation before opening an issue
